@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .box {
+            width: 100px;
+            display: inline-block;
+            height: 100px;
+            background-image: url(https://fanyi-cdn.cdn.bcebos.com/webStatic/translation/asset/product-app@2x.5c96abc6.png);
+            transition: all 2s;
+        }
+
+        .box:hover {
+            background-image: url(https://fanyi-cdn.cdn.bcebos.com/webStatic/translation/asset/product-helper@2x.42313ebc.png);
+            /* transition: background-image 2s; */
+        }
+
+        .rainbow {
+            background: linear-gradient(45deg, #9400D3, #4B0082, #0000FF, #00FF00, #FFFF00, #FF7F00, #FF0000);
+            height: 100px;
+            width: 1000px;
+            filter: hue-rotate(0deg);
+            -webkit-text-stroke: #FFF;
+            -webkit-text-stroke-width: 2px;
+            text-align: right;
+            font-family: Arial, Helvetica, sans-serif;
+            color: transparent;
+            font-weight: bold;
+            font-size: 96px;
+            mix-blend-mode: color;
+            padding-right: 20px;
+            box-sizing: border-box;
+        }
+
+
+        @keyframes hue {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+
+            50% {
+                filter: hue-rotate(180deg);
+            }
+
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .hue {
+            animation: hue 3s linear infinite;
+        }
+
+        @keyframes run {
+            0% {
+                background-position: 0px;
+            }
+
+            100% {
+                background-position: 1000px;
+            }
+        }
+
+        .run {
+            animation: run 3s linear infinite;
+        }
+
+        .text {
+            font-size: 128px;
+            position: fixed;
+            top: 100px;
+            mix-blend-mode: overlay;
+        }
+
+        .dragable-box {
+            background-color: #f15b5b;
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            border-radius: 10px;
+        }
+
+        .dragable-box::before {
+            content: attr(css-foo);
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            top: -10px;
+            background-color: #f15b5b;
+            left: 0;
+            border-radius: 10px;
+            filter: brightness(1.3);
+        }
+
+        .anchor:target {
+            padding-top: 100px !important;
+            margin-top: -100px !important;
+            background-color: red;
+        }
+    </style>
+    <script>
+        setTimeout(() => {
+            const draggables = document.querySelectorAll(".dragable-box");
+            draggables.forEach((draggable) => {
+                draggable.addEventListener("mousedown", (event) => {
+                    function normalDrag(element) {
+                        const offsetX = element.clientX - startX;
+                        const offsetY = element.clientY - startY;
+                        draggable.style.left = originalX + offsetX + "px";
+                        draggable.style.top = originalY + offsetY + "px";
+                    }
+                    event.preventDefault();
+                    const startX = event.clientX;
+                    const startY = event.clientY;
+                    const originalX = draggable.offsetLeft;
+                    const originalY = draggable.offsetTop;
+                    document.addEventListener("mousemove", normalDrag);
+                    document.addEventListener("mouseup", () => {
+                    document.removeEventListener("mousemove", normalDrag);
+                    });
+                    const rescrictDrag = () => { }
+                });
+            });
+        }, 0)
+    </script>
+</head>
+
+<body>
+    <div class="box"></div>
+    <div style="height: 200px;"></div>
+    <div class="rainbow">SOMETEXT</div>
+    <div class="rainbow hue">SOMETEXT</div>
+    <div class="rainbow run">SOMETEXT</div>
+    <div class="text">■ TEXT</div>
+    <div class="text" style="color: #FFF; top: 200px;">■ TEXT</div>
+    <div class="dragable-box" css-foo="hello" css-color="#4B0082"></div>
+    <div class="dragable-box ice" css-foo="ICE" css-color="#4B0082"></div>
+    <div style="height: 700px;"></div>
+
+</body>
+
+</html>

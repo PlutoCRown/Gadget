@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            display: flex;
+            justify-self: center;
+            align-self: center;   
+        }
+        .delete-button {
+            border: 1px solid red;
+            background-image: linear-gradient(90deg,rgba(255,0,0,0.2) 0%,rgba(255,0,0,0.2) 100%);
+            /* background-image: linear-gradient(90deg,red 0%,red 50%,#FFF 50%,#FFF 100%); */
+            background-size: 00%;
+            background-position: left center;
+            background-repeat: no-repeat;
+            padding: 5px 20px;
+            border-radius: 5px;
+            color: red;
+            transform: scale(1);
+            transition: background-size 1.5s,transform .3s ;
+            user-select: none;
+        }
+        .delete-button:active {
+            background-size: 100%;
+            transform: scale(0.98);
+        }
+    </style>
+    <script>
+        function del (e) {
+            console.log("点击",e.target)
+            const ddl = setTimeout(()=>{
+                console.log("完成移除")
+                e.target.remove();
+                document.documentElement.removeEventListener("mouseup",cancel);
+            },1500)
+            const cancel = ()=>{
+                console.log("取消")
+                clearTimeout(ddl);
+                document.documentElement.removeEventListener("mouseup",cancel);
+            }
+            document.documentElement.addEventListener("mouseup",cancel)
+        }
+
+        setTimeout(()=>{
+            document.querySelector(`.delete-button`).addEventListener("mousedown",del)
+        },200)
+    </script>
+</head>
+
+<body>
+    <div class="delete-button" >Delete!</div>
+</body>
+</html>

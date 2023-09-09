@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<script>
+    window.link = null
+    window.ipt = null
+    window.btn = null
+    setTimeout(()=>{
+        ipt=document.querySelector("#same")
+        ipt.addEventListener("change",()=>{
+            link.postMessage(ipt.value)
+        })
+        btn=document.querySelector("#as-master")
+        btn.addEventListener("click",asMaster)
+    },200)
+    window.onmessage=(msg)=>{
+        console.log(msg);
+        if(!link) {
+            link = msg.source;
+            document.querySelector("#role").innerText = "从";
+            document.querySelector("#port").innerText = msg.data;
+        } else {
+            ipt.value = msg.data;
+        }
+    }
+    function asMaster (){
+        if(link==null) {
+            link=window.open(window.location.href);
+            const id = Math.random().toString()
+            setTimeout(()=>{
+                link.postMessage(id);
+                document.querySelector("#role").innerText = "主"
+                document.querySelector("#port").innerText = id
+            },200)
+        }
+    }
+</script>
+
+<body>
+    <div id="role"></div>
+    <div id="port"></div>
+    <button id="as-master">创建链接</button>
+    <input type="text" name="" id="same">
+</body>
+
+</html>

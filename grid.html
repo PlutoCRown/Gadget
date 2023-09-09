@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .grid-item {
+            /* width: 100px; */
+            height: 100px;
+            border: 10px solid #0002;
+            box-sizing: border-box;
+            background-color: salmon;
+        }
+        .wrapper {
+            display: grid;
+        }
+        .auto-fit-fixed {
+            grid-template-columns: repeat(auto-fit,100px);
+        }
+        .auto-fill-fixed {
+            grid-template-columns: repeat(auto-fill,100px);
+        }
+        .auto-fit-minmax {
+            grid-template-columns: repeat(auto-fit, minmax(100px,1fr));
+        }
+        .auto-fill-minmax {
+            grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+        }
+    </style>
+</head>
+<body>
+    <h1>repeat(auto-fit,100px)</h1>
+    <div class="wrapper auto-fit-fixed">
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+    </div>
+    <h1>repeat(auto-fill,100px)</h1>
+    <div class="wrapper auto-fill-fixed">
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+    </div>
+    <h1>repeat(auto-fit,minmax)</h1>
+    <div class="wrapper auto-fit-minmax">
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+    </div>
+    <h1>repeat(auto-fill,minmax)</h1>
+    <div class="wrapper auto-fill-minmax">
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+        <div class="grid-item"></div>
+    </div>
+</body>
+</html>

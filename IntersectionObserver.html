@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        setTimeout(() => {
+            const text = document.querySelector(".text");
+            const obs = new IntersectionObserver(
+                (entries, observer) => {
+                    entries[0].target.style.backgroundColor = `rgb(${entries[0].intersectionRatio * 255},0,0)`;
+                    text.innerHTML = new Date().getMilliseconds();
+                },
+                {   // 祖先元素|视口元素
+                    // root: document.querySelector(".view"),
+                    rootMargin: "0px",
+                    threshold: new Array(255).fill(0).map((i, x) => x / 255),
+                }
+            )
+            obs.observe(document.querySelector(".detech"));
+        }, 200)
+    </script>
+    <style>
+        .container {
+            height: 100vh;
+            background-color: antiquewhite;
+        }
+        body {
+            margin: 0;
+        }
+        .detech {
+            height: 40vh;
+            background-color: blueviolet;
+        }
+        .view {
+            height: 40vh;
+            /* background-color: rgba(92, 202, 185, 0.3); */
+            position: fixed;
+            top: 20vh;
+            width: 100%;
+            left: 0;
+            z-index: 1;
+            overflow: visible;
+        }
+        .can {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            overflow: scroll;
+        }
+        .text {
+            position: fixed;
+            left: 10px;
+            top: 10px;
+            z-index: 1;
+            color: tomato;
+        }
+    </style>
+</head>
+    <body>
+        <div class="view"></div>
+        <div class="container"></div>
+        <div class="text">time</div>
+        <div class="detech"></div>
+        <div class="container"></div>
+    </body>
+</html>

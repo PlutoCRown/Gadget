@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script lang="ts">
+        const dbName = "todolist";
+        const storeName = "todos";
+        const useDB = (dbName,init) => new Promise((resolve,reject)=>{
+            const request = indexedDB.open(dbName);
+            request.onerror = reject;
+            request.onupgradeneeded = init ? init : ()=> reject(new Error("DB not exist"));
+            request.onsuccess = (event) => resolve(event.target.result);
+        })
+        const useTable = (tableName,readType) => (db) => {
+            const transaction = db.transaction([tableName], readType);
+            transaction.oncomplete = (event) => db.close() ;
+            return transaction.objectStore(tableName);
+        }
+        const CloseWith = (cb) => (RequestResult) => {
+            RequestResult.onsuccess = function (event) {
+                cb();
+            };
+            cb();
+        }
+        // init
+        useDB(storeName,(event) => {
+            const db = event.target.result;
+            const objectStore = db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+            objectStore.createIndex("title", "title", { unique: false });
+        })
+        // Add
+        function addTodoItem(title) {
+            useDB(storeName).then(useTable("todos","readwrite")).then((table)=>{
+                return table.add({ title: title, id:Math.random() })
+            }).then(CloseWith(()=>{
+                console.log("更新成功");
+                updateView();
+            }))
+        }
+        // GetAll
+        function getAllTodoItems(callback) {
+            useDB(storeName).then(useTable("todos","readonly")).then((table)=>{
+                const data =  table.getAll().onsuccess = (e=>callback(e.target.result))
+            })
+        }
+        // Delect By Id
+        function deleteTodoItem(id) {
+            useDB(storeName).then(useTable(storeName,"readwrite")).then(table=>{
+                return table.delete(id);
+            }).then(CloseWith(()=>{
+                updateView();
+                console.log("删除成功");
+            }))
+        }
+
+        function add() {addTodoItem(document.querySelector("#in").value)}
+        function updateView() {
+            getAllTodoItems(todos=>{
+                document.querySelector("ul").innerHTML = todos.map(todo=>
+                    `<li>${todo.title}<button onclick="deleteTodoItem(${todo.id})">X</button></li>`
+                ).reduce((p,c)=>p+c,"")
+            })
+        }
+        updateView()
+        function clearDatabase() {
+            useDB("todolist").then(useTable("todos","readwrite")).then((table)=>{
+                return table.clear();
+            }).then(CloseWith(updateView))
+        }
+    </script>
+</head>
+<body>
+    <ul>
+    </ul>
+    <input type="text" id="in">
+    <button onclick="add()">Add</button>
+    <button onclick="clearDatabase()">Clear</button>
+    <pre>
+IDBFactory -> IDBRequest
+|           | onupgradeneeded   -> init
+|           | onsuccess         -> IDBDatabase
+|           | onerror           = close
+|                               = transaction()         -> IDBTransaction
+|                               = createObjectStore()    = error()
+|                               = deleteObjectStore()    = abort()
+|                               | onabort                = objectStore()  -> IDBObjectStore
+|                               | onerror                                  = createIndex/index      -> IDBIndex
+|                               | onerror                | onerror         = add/clear/count/delete -> IDBRequest
+|                               | onversionchange        | onabort           /get/openCursor/put
+    </pre>
+</body>
+</html>
