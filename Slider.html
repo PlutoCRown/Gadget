@@ -13,18 +13,21 @@
             height: 100%;
             font-size: 20em;
             text-align: center;
-            color:#FFF3;
+            color: #FFF3;
         }
+
         body {
             margin: 0;
             padding: 0;
         }
+
         .wrapper {
             max-height: 100vh;
             height: 100vh;
             overflow: auto;
             margin-bottom: 200px;
         }
+
         ::-webkit-scrollbar {
             width: 0;
         }
@@ -35,27 +38,27 @@
             transform: scale(0.5);
             transition: transform 1s;
         }
+
         .slider.active {
             transform: scale(1);
         }
     </style>
     <script>
-        setTimeout(()=>{
+        setTimeout(() => {
             var running = false;
             var cur = 0;
             const container = document.querySelector(".wrapper")
             var slides = document.querySelectorAll(".slider")
-            container.addEventListener("wheel",(e)=>{
+            container.addEventListener("wheel", (e) => {
                 e.preventDefault()
                 if (!running) {
                     var direction = e.deltaY > 0 ? 1 : -1
-                    if(cur+direction >= 0 && cur+direction < slides.length) {
+                    if (cur + direction >= 0 && cur + direction < slides.length) {
                         slides[cur].classList.remove("active");
                         // 开始移动
                         cur = cur + direction
                         slides[cur].classList.add("active");
                         var slideOffset = slides[cur].offsetTop;
-                        console.log(slideOffset /917)
                         container.scrollTo({
                             top: slideOffset,
                             behavior: "smooth"
@@ -66,8 +69,8 @@
                         }, 700)
                     }
                 }
-            },{passive:false})
-        },200)
+            }, { passive: false })
+        }, 200)
     </script>
 </head>
 
