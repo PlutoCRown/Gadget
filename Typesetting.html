@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: antiquewhite;
+            font-family: SimSun, Arial;
+            padding: 5vw 7vw;
+            max-width: 1700px;
+        }
+
+        .title {
+            font-size: 100px;
+            letter-spacing: 0.5em;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        nav {
+            border: 2px solid #000;
+            padding: 4px;
+            border-left-width: 0;
+            border-right-width: 0;
+            margin: 1em 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .col-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            column-gap: 2em;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="title">
+            中文排版
+        </div>
+        <div style="writing-mode: vertical-rl;">
+            <div>其他信息：</div>
+            <div>日期：1234</div>
+            <div>时间：1234</div>
+        </div>
+    </header>
+    <nav>
+        <span>Lorem</span>
+        <span>Lorem</span>
+        <span>Lorem</span>
+        <span>Lorem</span>
+        <span>Lorem</span>
+    </nav>
+    <div class="col-4">
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem dignissimos et repellat nemo excepturi eius
+            est ullam voluptate? Voluptates reprehenderit quae architecto laborum culpa autem adipisci fugiat maiores
+            voluptas aliquid?</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus nulla quas rerum nobis laborum deserunt?
+            Repellendus rem at autem impedit, nesciunt vitae harum repellat enim ipsum aut! Reprehenderit, expedita
+            magni.</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ut, nulla error repellat doloremque minus nemo
+            labore quae incidunt quibusdam aliquam eos doloribus voluptas animi exercitationem nisi ab hic quisquam?
+            Ipsam!</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae impedit fuga quidem sed unde, similique
+            iste deleniti? Quia voluptas, doloribus repudiandae voluptatum dolore alias autem, minima quo debitis
+            dolorem assumenda.</p>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function record() {
+            navigator.mediaDevices.getDisplayMedia()
+                .then(mediaStream => {
+                    const options = { mimeType: 'video/webm; codecs=vp9', };
+                    const mediaRecorder = new MediaRecorder(mediaStream, options);
+                    let chunks = [];
+                    console.log(mediaRecorder)
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        if (event.data.size > 0) {
+                            chunks.push(event.data);
+                        }
+                    });
+                    mediaRecorder.addEventListener('stop', () => {
+                        const blob = new Blob(chunks, { type: 'video/webm' });
+                        const url = URL.createObjectURL(blob);
+                        document.querySelector(".page-transcodecs video").src = url
+                        // const a = document.createElement('a');
+                        // a.href = url;
+                        // a.download = 'screen-record.webm';
+                        // document.body.appendChild(a);
+                        // a.click();
+                        // URL.revokeObjectURL(url);
+                    });
+                    mediaRecorder.start();
+                    setTimeout(() => {
+                        // 停止录制
+                        mediaRecorder.stop();
+                    }, 10000); // 录制10秒钟
+                })
+                .catch(error => {
+                    console.error('getUserMedia error:', error);
+                });
+        }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            height: 100%;
+        }
+
+        html {
+            height: 100%;
+            font-family: Helvetica, sans-serif;
+            font-size: 20px;
+            color: #7a7a7a;
+        }
+
+        .page-transcodecs,
+        .page-recoder {
+            display: flex;
+            flex-direction: row;
+            height: 100%;
+            width: 100%;
+        }
+        @media screen and (max-width:765px) {
+            .page-recoder {
+                flex-direction: column;
+            }
+        }
+        .page-transcodecs {
+            background-color: burlywood;
+        }
+        .left-block,
+        .right-block {
+            flex-basis: 0;
+            flex-grow: 1;
+            padding: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .page-recoder .left-block button{
+            all: unset;
+            width:10em;
+            height: 10em;
+            background-color: rgba(123,43,1,0.2);
+            border-radius: 50%;
+            text-align: center;
+            color: #FFF;
+            font-weight: bold;
+            transition: all .3s;
+        }
+        .left-block button:hover {
+            transform: scale(0.98);
+        }
+        .line {
+            width: 100%;
+            padding: 1em;
+        }
+        .line label {
+            display: block;
+            margin-bottom: 8px;
+            margin-left: 0.2em;
+        }
+        .line input,
+        .line select {
+            width: 100%;
+            display: inline-block;
+            border: 0;
+            background-color: rgb(238, 238, 238);
+            border-radius: 0.6em;
+            padding: 1em;
+            box-sizing: border-box;
+            outline-color: antiquewhite;
+        }
+        .page-transcodecs video {
+            width: 100%;
+            max-height: 90%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-recoder">
+        <div class="left-block">
+            <button onclick="record()">Record</button>
+        </div>
+        <div class="right-block">
+            <div class="line">
+
+                <label for="pet-select">Video Type:</label>
+                <select>
+                    <option value="webm">mp4</option>
+                    <option value="webm">webm</option>
+                </select>
+            </div>
+            <div class="line">
+                <label for="pet-select">Video Codecs:</label>
+                <select>
+                    <option value="h264">h264</option>
+                    <option value="vp9">vp9</option>
+                </select>
+            </div>
+            <div class="line">
+                <label for="pet-select">audioBitsPerSecond(kb):</label>
+                <input type="number" value="2500">
+            </div>
+            <div class="line">
+                <label for="pet-select">videoBitsPerSecond(kb):</label>
+                <input type="number" value="2500">
+            </div>
+            <div class="line">
+                <label for="pet-select">FileName:</label>
+                <input type="text" placeholder="Record_{{time}}.mp4">
+            </div>
+        </div>
+    </div>
+    <div class="page-transcodecs">
+        <div class="left-block">
+            <video autoplay controls></video>
+            <button>Download</button>
+        </div>
+        <div class="right-block"></div>
+    </div>
+    <!-- <div>MediaRecorder: 49</div> -->
+    <!-- <div>getDisplayMedia: 74</div> -->
+</body>
+
+</html>
