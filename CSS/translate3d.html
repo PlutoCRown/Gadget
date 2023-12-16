@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .pre-page,
+    div#page,
+    .post-page {
+      background: aliceblue;
+      width: 20vw;
+      height: 30vh;
+      transform-origin: left bottom;
+      border: 10px solid #0001;
+      transition: all 1s;
+    }
+
+    .pre-page,
+    #page,
+    .post-page {
+      position: absolute;
+    }
+
+    .hv {
+      transition: all 1s;
+      /* transform: perspective(1500px) rotate3d(1, 0, 0, -30deg); */
+    }
+
+
+    div#page,
+    .post-page {
+      transform: perspective(700px) rotate3d(0, 1, 0, -30deg) rotate3d(1, 0, 0, -30deg);
+    }
+
+    .pre-page,
+    .hv:hover #page {
+      transform: perspective(700px) rotate3d(0, 1, 0, -150deg) rotate3d(1, 0, 0, -30deg);
+    }
+
+    div#page::before {
+      position: absolute;
+      content: '⬆️';
+      font-size: 10rem;
+    }
+
+    #page::after {
+      content: '';
+      background: red;
+      width: 1px;
+      height: 100%;
+      align-self: end;
+    }
+
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+    }
+
+    body,
+    #page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hv">
+    <div class="pre-page"></div>
+    <div id="page"></div>
+    <div class="post-page"></div>
+  </div>
+</body>
+
+</html>

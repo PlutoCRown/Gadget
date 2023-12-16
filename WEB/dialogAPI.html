@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- 第一个框 -->
+    <style>
+      dialog {
+        border: 0;
+        outline: 0;
+        margin: 0;
+        padding: 0;
+        left: 20em;
+        top: 20em;
+      }
+      legend {
+        user-select: none;
+        cursor: move;
+      }
+      fieldset {
+        margin: 0;
+        box-sizing: border-box;
+        width: 600px;
+        height: 250px;
+      }
+      .resize {
+        position: absolute;
+        cursor: nwse-resize;
+        width: 8px;
+        height: 8px;
+        content: "";
+        right: -2px;
+        bottom: -2px;
+      }
+      .wbw {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        white-space: pre-wrap;
+        position: relative;
+      }
+      .wbw::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+        border-top: 10px solid #000;
+        content: "";
+        opacity: 0;
+      }
+      .end.wbw::after {
+        opacity: 1;
+        animation: floatNS infinite alternate-reverse 1s ease-in-out;
+      }
+      @keyframes floatNS {
+        0% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+    </style>
+    <!-- 第二个框 -->
+    <style>
+      .container {
+        width: 600px;
+        --line-height: 1.5em;
+        --speed: 5s;
+      }
+      .h-control {
+        height: calc(var(--line-height) * var(--line));
+        line-height: var(--line-height);
+        overflow: hidden;
+      }
+      .w-control.play {
+        position: relative;
+        /* background-color: antiquewhite; */
+        width: 100%;
+        height: calc(var(--line-height) * var(--line));
+      }
+      .play.playing.w-control::after {
+        border-left: 1px solid;
+      }
+      .play.w-control::after {
+        width: 100%;
+        position: absolute;
+        height: var(--line-height);
+        content: "";
+        bottom: 0;
+        right: 0;
+        animation: widthSpace var(--speed) forwards linear;
+        background-color: #fff;
+      }
+      @keyframes widthSpace {
+        0% {
+          width: 100%;
+        }
+        100% {
+          width: 0%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <dialog open>
+      <fieldset>
+        <legend>点击以开始对话</legend>
+        <div class="wbw end"></div>
+      </fieldset>
+    </dialog>
+
+    <dialog open style="top: 50vh">
+      <fieldset class="container">
+        <legend>更流畅的文字出现：点击重新播放</legend>
+        <div class="h-control" style="--line: 1">
+          <div class="w-control play playing">
+            =-=-=-=-=-=-=-=中文中文中文中文中文中文中文中文=-=-=-=-=-=-=-=-=
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum,
+            aperiam officiis fugiat optio obcaecati dolores facere ipsa id,
+            perferendis eum nesciunt? Earum accusantium exercitationem tenetur
+            totam et dicta eaque impedit.
+          </div>
+        </div>
+      </fieldset>
+    </dialog>
+
+    <!-- Resizable fieldset -->
+    <script>
+      const AllDo = (key, cb) =>
+        [...document.querySelectorAll(key)].forEach(cb);
+
+      AllDo("fieldset", (item) => {
+        const resize = document.createElement("a");
+        resize.className = "resize";
+        item.appendChild(resize);
+        resize.addEventListener("mousedown", () => {
+          const rect = item.getBoundingClientRect();
+          const move = (e) => {
+            item.style.width = `${Math.max(200, e.clientX - rect.left)}px`;
+            item.style.height = `${Math.max(200, e.clientY - rect.top)}px`;
+          };
+          document.addEventListener("mousemove", move);
+          document.addEventListener("mouseup", () => {
+            document.removeEventListener("mousemove", move);
+          });
+        });
+      });
+    </script>
+    <!-- draggable dialog -->
+    <script>
+      [...document.querySelectorAll("dialog")].forEach((dialog) => {
+        const label = dialog.querySelector("legend");
+        let startPosX, startPosY, startMouseX, startMouseY;
+        label.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          startPosX = dialog.offsetLeft;
+          startPosY = dialog.offsetTop;
+          startMouseX = e.clientX;
+          startMouseY = e.clientY;
+          const move = (e) => {
+            const deltaX = e.clientX - startMouseX;
+            const deltaY = e.clientY - startMouseY;
+            dialog.style.left = `${startPosX + deltaX}px`;
+            dialog.style.top = `${startPosY + deltaY}px`;
+          };
+          document.addEventListener("mousemove", move);
+          document.addEventListener("mouseup", () => {
+            document.removeEventListener("mousemove", move);
+          });
+        });
+      });
+    </script>
+    <!-- word by word Appearing -->
+    <script>
+      let content = [
+        {
+          title: "对话框：拉我可以拖动对话框",
+          content:
+            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos eaque reprehenderit esse officiis unde! Eos soluta a, et consequatur aut quasi saepe officia dolorum at sunt id dolores, cumque sequi?",
+        },
+        {
+          title: "对话框：右下角可以调整窗口大小",
+          content:
+            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat, a. Corporis placeat, mollitia odit minus ullam, quidem dolores eveniet, veritatis illo debitis assumenda amet soluta! Ab reiciendis minima placeat consequuntur?",
+        },
+        {
+          title: "对话框：点击可以快速完成对话",
+          content:
+            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos eaque reprehenderit esse officiis unde! Eos soluta a, et consequatur aut quasi saepe officia dolorum at sunt id dolores, cumque sequi?",
+        },
+        {
+          title: "对话框：这是最后一句对话",
+          content:
+            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat, a. Corporis placeat, mollitia odit minus ullam, quidem dolores eveniet, veritatis illo debitis assumenda amet soluta! Ab reiciendis minima placeat consequuntur?",
+        },
+      ];
+      let runningRAF = 0;
+      let dialogIndex = 0;
+      document.querySelector(".wbw").addEventListener("click", (e) => {
+        const { target } = e;
+        if (runningRAF !== 0) {
+          // 跳过
+          target.classList.add("end");
+          cancelAnimationFrame(runningRAF);
+          runningRAF = 0;
+          target.innerText = content[dialogIndex].content;
+          dialogIndex++;
+        } else if (dialogIndex < content.length) {
+          // 播放
+          target.classList.remove("end");
+          const seg = content[dialogIndex].content.split("");
+          target.innerText = "";
+          target.parentElement.querySelector("legend").innerText =
+            content[dialogIndex].title;
+          const pushWord = (target, content, index = 0) => {
+            target.innerText = target.innerText + content[index];
+            if (index < content.length - 1) {
+              runningRAF = requestAnimationFrame(() =>
+                pushWord(target, content, index + 1)
+              );
+            } else {
+              target.classList.add("end");
+              runningRAF = 0;
+              dialogIndex++;
+            }
+          };
+          pushWord(target, seg);
+        } else {
+          // 完成
+          console.log("对话完成");
+        }
+      });
+    </script>
+    <!-- Smoother Appearance -->
+    <script>
+      let i = 1;
+      let opRunning = true;
+      const resetAnimate = (target) => {
+        target.parentElement.style.setProperty("--line", i);
+        target.classList.remove("play");
+        void target.offsetWidth; // 访问计算属性以导致浏览器回流
+        target.classList.add("play");
+        opRunning = true;
+      };
+      AllDo(".w-control", (op) => {
+        op.addEventListener("animationend", (e) => {
+          if (e.target.scrollHeight > e.target.clientHeight) {
+            i += 1;
+            resetAnimate(op);
+          } else {
+            op.classList.remove("playing");
+          }
+        });
+        // 点击可以从新播放
+        op.parentElement.parentElement.addEventListener("click", (e) => {
+          if (!op.classList.contains("playing")) {
+            op.parentElement.parentElement.style.setProperty("--speed", "5s");
+            op.classList.add("playing");
+            i = 1;
+            resetAnimate(op);
+          } else {
+            op.parentElement.parentElement.style.setProperty("--speed", "0.3s");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

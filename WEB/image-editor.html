@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>拖拽上传图片</title>
+  <style>
+    .drop-area {
+      width: 300px;
+      height: 300px;
+      border: 2px dashed #ccc;
+      text-align: center;
+      line-height: 300px;
+      cursor: pointer;
+    }
+
+    .drop-area.highlight {
+      background-color: #f0f0f0;
+    }
+
+    .flex {
+      display: flex;
+      gap: 8px;
+    }
+
+    .flex>div {
+      flex-basis: 0;
+      flex-grow: 1;
+    }
+
+    .flex img {
+      max-width: 50vw;
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .col {
+      flex-direction: column;
+    }
+
+    .center {
+      justify-content: center;
+      align-items: center;
+    }
+
+    label {
+      transform: translate(3px, 10px);
+    }
+
+    .stack:has(img) #transparent-grid,
+    .stack:has(img) #replace-background {
+      opacity: 1;
+    }
+
+    #replace-background {
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #transparent-grid {
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background-size: 20px;
+      image-rendering: pixelated;
+    }
+
+    .stack {
+      position: relative;
+      height: fit-content;
+    }
+
+    .stack>div {
+      top: 0;
+      left: 0;
+      position: absolute;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="flex">
+    <div class="stack">
+      <div id="dropArea" class="drop-area">拖拽图片至此处</div>
+      <div id="replace-background" style="z-index: -1;"></div>
+      <div id="transparent-grid"></div>
+      <canvas id="csv" style="position: absolute;top: 0;left: 0;z-index: 1;" width="200" height="200"></canvas>
+    </div>
+    <div id="op" class="flex col">
+      <div>
+        <label for="hue">HUE-Rotate</label>
+        <input type="range" name="hue" id="hue" max="260" min="0">
+      </div>
+      <div>
+        <label for="">BackGroundFilter</label>
+        <input type="color" name="" value="#FFFFFF">
+      </div>
+      <div>
+        <label for="">FilterThr</label>
+        <input type="number" name="" max="255" value="1">
+      </div>
+      <div>
+        <label for="">ReplaceBackground</label>
+        <input type="color" name="" id="background-color" value="#FFFFFF">
+        <input type="range" name="" id="background-opacity" value="0" min="0" max="100">
+      </div>
+    </div>
+  </div>
+  <script>
+    const canvas = document.querySelector('#csv');
+    const ctx = canvas.getContext('2d');
+
+    function toCanvas(img) {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      console.log(img.width, img.height)
+      // document.createElement('canvas').getContext('2d')
+      ctx.drawImage(img, 0, 0, img.width, img.height);
+      const imageData = ctx.getImageData(0, 0, img.width, img.height)
+      const data = imageData.data
+      for (let i = 0; i < data.length / 4; i++) {
+        data[i * 4 + 3] = Math.min(255, (255 * 3 - data[i * 4] - data[i * 4 + 1] - data[i * 4 + 2]) * 8)
+      }
+      const newImage = new ImageData(data, img.width, img.height)
+      window.transparentImage = newImage
+      ctx.putImageData(newImage, 0, 0);
+      img.style.opacity = 0
+      return canvas;
+    }
+    function hueChange(v) {
+      ctx.filter = v
+      console.log("rerenderer")
+      ctx.putImageData(transparentImage, 0, 0)
+    }
+
+  </script>
+
+  <script>
+    function handleDrop(event) {
+      event.preventDefault();
+      dropArea.classList.remove("highlight");
+      const files = event.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            dropArea.parentNode.replaceChild(img, dropArea);
+            setTimeout(() => {
+              toCanvas(img)
+            }, 1000)
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+
+    const dropArea = document.getElementById('dropArea');
+    dropArea.addEventListener('dragover', function (event) {
+      event.preventDefault();
+      dropArea.classList.add("highlight");
+    });
+    dropArea.addEventListener('dragleave', function (event) {
+      event.preventDefault();
+      dropArea.classList.remove("highlight");
+    });
+    dropArea.addEventListener('drop', handleDrop);
+    const ReplaceBackground = document.querySelector("#replace-background")
+    document.getElementById("background-color").onchange = (v) => {
+      ReplaceBackground.style.backgroundColor = v.target.value
+    }
+    document.getElementById("background-opacity").onchange = (v) => {
+      ReplaceBackground.style.opacity = v.target.value / 100
+    }
+    document.getElementById("hue").onchange = (v) => {
+      console.log(v.target.value)
+      hueChange('hue-rotate(' + v.target.value + 'deg)')
+    }
+
+  </script>
+  <script>
+    const light = 0 // 亮色
+    const dark = 255 // 暗色
+    const opca = 64 // 透明度
+    const back = [light, dark, dark, light].map(i => [i, i, i, opca]).flat()
+    function imageDataToDataURL(imageData) {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      canvas.width = imageData.width;
+      canvas.height = imageData.height;
+
+      // 将 ImageData 绘制到画布上
+      context.putImageData(imageData, 0, 0);
+
+      // 获取 Data URL
+      const dataURL = canvas.toDataURL();
+
+      return dataURL;
+    }
+    const data = new ImageData(new Uint8ClampedArray(back), 2, 2)
+    const dataURL = imageDataToDataURL(data);
+    document.querySelector("#transparent-grid").style.backgroundImage = `url(${dataURL})`;
+  </script>
+</body>
+
+</html>

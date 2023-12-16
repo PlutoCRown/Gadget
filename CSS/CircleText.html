@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #myContainer {
+      width: 400px;
+      height: 400px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #circle-text {
+      transform-origin: center center;
+      animation: rotate 40s linear infinite;
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <svg width="400" height="400" id="circle-text">
+    <path d="M200 20 A180 180 0 1 1 200 380 A180 180 0 1 1 200 20 Z" id="myPath" fill="none"></path>
+    <text font-size="20">
+      <textPath href="#myPath" startOffset="10%"
+        style="letter-spacing: 0.2em;font-size: 24px; font-weight: 900;font-family: Helvetica;white-space: pre;">
+        Hello!                            World.execute(me);
+      </textPath>
+    </text>
+  </svg>
+</body>
+
+</html>
+
+<script>
+  const l = 200
+  const s = 20
+</script>
