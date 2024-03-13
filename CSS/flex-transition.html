@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0px;
+    }
+
+    .flex {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      width: 100vw;
+      height: 100vh;
+      flex-wrap: nowrap;
+      background-color: #000;
+    }
+
+    .item:hover {
+      flex-grow: 1;
+    }
+
+    .item:has(~.item:hover),
+    .item:hover~.item {
+      width: calc(100vw / 10);
+    }
+
+    .item:has(~.item:hover)>img,
+    .item:hover~.item>img {
+      filter: blur(2px);
+      border-color: #FFF2;
+    }
+
+
+    .item {
+      border: 2px solid #FFF;
+      box-sizing: border-box;
+      transition: all .3s;
+      width: calc(100vw / 7);
+      border-radius: 30px;
+      margin: 10px;
+      height: 90%;
+      cursor: pointer;
+      overflow: hidden;
+
+    }
+
+    img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="flex">
+    <div class="item"><img src="/img/pic.jpg"> </div>
+    <div class="item"><img src="/img/pic.jpg"> </div>
+    <div class="item"><img src="/img/pic.jpg"> </div>
+    <div class="item"><img src="/img/pic.jpg"> </div>
+    <div class="item"><img src="/img/pic.jpg"> </div>
+    <div class="item"><img src="/img/pic.jpg"> </div>
+    <div class="item"><img src="/img/pic.jpg"> </div>
+
+  </div>
+</body>
+
+</html>

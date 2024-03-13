@@ -117,12 +117,11 @@
       canvas.width = img.width;
       canvas.height = img.height;
       console.log(img.width, img.height)
-      // document.createElement('canvas').getContext('2d')
       ctx.drawImage(img, 0, 0, img.width, img.height);
       const imageData = ctx.getImageData(0, 0, img.width, img.height)
       const data = imageData.data
       for (let i = 0; i < data.length / 4; i++) {
-        data[i * 4 + 3] = Math.min(255, (255 * 3 - data[i * 4] - data[i * 4 + 1] - data[i * 4 + 2]) * 8)
+        data[i * 4 + 3] = Math.min(255, (255 * 3 - data[i * 4] - data[i * 4 + 1] - data[i * 4 + 2]))
       }
       const newImage = new ImageData(data, img.width, img.height)
       window.transparentImage = newImage
@@ -131,8 +130,7 @@
       return canvas;
     }
     function hueChange(v) {
-      ctx.filter = v
-      console.log("rerenderer")
+      canvas.style.filter = v
       ctx.putImageData(transparentImage, 0, 0)
     }
 
@@ -171,13 +169,13 @@
     });
     dropArea.addEventListener('drop', handleDrop);
     const ReplaceBackground = document.querySelector("#replace-background")
-    document.getElementById("background-color").onchange = (v) => {
+    document.getElementById("background-color").oninput = (v) => {
       ReplaceBackground.style.backgroundColor = v.target.value
     }
-    document.getElementById("background-opacity").onchange = (v) => {
+    document.getElementById("background-opacity").oninput = (v) => {
       ReplaceBackground.style.opacity = v.target.value / 100
     }
-    document.getElementById("hue").onchange = (v) => {
+    document.getElementById("hue").oninput = (v) => {
       console.log(v.target.value)
       hueChange('hue-rotate(' + v.target.value + 'deg)')
     }
@@ -187,7 +185,7 @@
     const light = 0 // 亮色
     const dark = 255 // 暗色
     const opca = 64 // 透明度
-    const back = [light, dark, dark, light].map(i => [i, i, i, opca]).flat()
+    const back = [light, dark, dark, light].flatMap(i => [i, i, i, opca])
     function imageDataToDataURL(imageData) {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');

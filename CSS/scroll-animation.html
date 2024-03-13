@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
+      padding: 20px
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .view-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 10px;
+      z-index: 1;
+      background-color: blue;
+      animation-name: process;
+      animation-timeline: scroll();
+    }
+
+    @keyframes process {
+      to {
+        width: 100%;
+      }
+    }
+  </style>
+  <div class="view-bar">
+  </div>
+  <style>
+    .ani-time-content>* {
+      animation-name: slowIn;
+      animation-direction: alternate;
+      animation-timeline: view(block);
+    }
+
+    .ani-time-content .box {
+      width: 100%;
+      height: 20vh;
+      margin: 10px 0;
+      background-color: red;
+    }
+
+    @keyframes slowIn {
+
+      0% {
+        transform: translateY(30vh);
+        opacity: 0;
+      }
+
+
+      10%,
+      80% {
+        transform: translateY(0vh);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: translateY(-30vh);
+        opacity: 0;
+      }
+    }
+  </style>
+  <div class="ani-time-content">
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+  </div>
+
+  <style>
+    .diff-scroll .inner {
+      animation-name: diff;
+      animation-timeline: view(y);
+    }
+
+    .diff-scroll {
+      height: 200vh;
+      background-color: antiquewhite;
+      line-height: 0;
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    @keyframes diff {
+      0% {
+        transform: translateY(10vh);
+      }
+
+      100% {
+        transform: translateY(-10vh);
+      }
+    }
+
+    .diff-scroll img {
+      width: 100%;
+    }
+
+    .diff-scroll .box {
+      border: 10px solid blue;
+      height: 50vw;
+      z-index: 1;
+    }
+  </style>
+  <div class="diff-scroll">
+    <div class="box">
+      <div class="inner">
+        <img src="../aiasset/场景/09a4e090-0825-42f9-bff7-6b65f541082c.png" alt="">
+      </div>
+    </div>
+    <div class="box">
+      <div class="inner">
+        <img src="../aiasset/场景/09a4e090-0825-42f9-bff7-6b65f541082c.png" alt="">
+      </div>
+    </div>
+    <div class="box">
+      <div class="inner">
+        <img src="../aiasset/场景/09a4e090-0825-42f9-bff7-6b65f541082c.png" alt="">
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+</body>
+
+</html>

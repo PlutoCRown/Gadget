@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        setTimeout(() => {
+            // 这是svg
+            console.log(
+                `data:image/svg+xml;base64,${window.btoa(
+                    new XMLSerializer()
+                        .serializeToString(
+                            document.querySelector('svg')
+                        )
+                )
+                }`
+            );
+        }, 100)
+        // new XMLSerializer().serializeToString(Node) == Node.outerHTML
+    </script>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1f0164;
+            min-height: 100vh;
+        }
+
+        .css-is-awesome {
+            font-size: 5rem;
+            color: #FFF;
+            font-weight: bold;
+            border: 1rem solid;
+            line-height: 5rem;
+            padding: 1rem;
+            width: 15rem;
+            user-select: none;
+        }
+
+        .cjj {
+            --cjj-size: 70px;
+            height: var(--cjj-size);
+            position: fixed;
+            border-radius: 5px;
+            overflow: hidden;
+            display: inline;
+            right: 20px;
+            bottom: 20px;
+            /* close */
+            display: none;
+        }
+
+        .cjj2 {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            --cjj-size: 70px;
+            border-radius: 5px;
+            height: var(--cjj-size);
+            width: var(--cjj-size);
+            background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAiIGhlaWdodD0iNzAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIj4KICAgICAgICAgICAgICAgIDxwb2x5bGluZSBwb2ludHM9IjMwIDUgNSA1IDUgMjUgMzAgMjUiIHN0cm9rZT0icmVkIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgZmlsbD0ibm9uZSIvPgogICAgICAgICAgICAgICAgPHBvbHlsaW5lIHBvaW50cz0iNDUgMCA0NSA0NSAzMCA0NSIgc3Ryb2tlPSJyZWQiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIHN0cm9rZS13aWR0aD0iMTAiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBmaWxsPSJub25lIi8+CiAgICAgICAgICAgICAgICA8cG9seWxpbmUgcG9pbnRzPSI2NSAyMCA2NSA2NSA1MCA2NSIgc3Ryb2tlPSJyZWQiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIHN0cm9rZS13aWR0aD0iMTAiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBmaWxsPSJub25lIi8+CiAgICAgICAgICAgICAgICA8cG9seWxpbmUgcG9pbnRzPSI2NSAwIDY1IDEwIiBzdHJva2U9InJlZCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLXdpZHRoPSIxMCIgc3Ryb2tlLWxpbmVjYXA9ImJ1dHQiIGZpbGw9Im5vbmUiLz4KICAgICAgICAgICAgICAgIDxwb2x5bGluZSBwb2ludHM9IjAgNDUgMjAgNDUiIHN0cm9rZT0icmVkIiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgZmlsbD0ibm9uZSIvPgogICAgICAgICAgICAgICAgPHBvbHlsaW5lIHBvaW50cz0iMCA2NSA0MCA2NSIgc3Ryb2tlPSJyZWQiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIHN0cm9rZS13aWR0aD0iMTAiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBmaWxsPSJub25lIi8+CiAgICAgICAgICAgIDwvc3ZnPg==);
+        }
+    </style>
+</head>
+
+<body>
+    <span>
+        <div class="css-is-awesome">
+            CSS<br>
+            IS<br>
+            AWESOME
+        </div>
+        <div class="cjj">
+            <svg width="70" height="70" xmlns="http://www.w3.org/2000/svg" version="1.1">
+                <polyline points="30 5 5 5 5 25 30 25" stroke="red" stroke-linejoin="miter" stroke-width="10"
+                    stroke-linecap="butt" fill="none" />
+                <polyline points="45 0 45 45 30 45" stroke="red" stroke-linejoin="miter" stroke-width="10"
+                    stroke-linecap="butt" fill="none" />
+                <polyline points="65 20 65 65 50 65" stroke="red" stroke-linejoin="miter" stroke-width="10"
+                    stroke-linecap="butt" fill="none" />
+                <polyline points="65 0 65 10" stroke="red" stroke-linejoin="miter" stroke-width="10"
+                    stroke-linecap="butt" fill="none" />
+                <polyline points="0 45 20 45" stroke="red" stroke-linejoin="miter" stroke-width="10"
+                    stroke-linecap="butt" fill="none" />
+                <polyline points="0 65 40 65" stroke="red" stroke-linejoin="miter" stroke-width="10"
+                    stroke-linecap="butt" fill="none" />
+            </svg>
+        </div>
+        <div class="cjj2"> </div>
+    </span>
+</body>
+
+</html>

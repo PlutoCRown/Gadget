@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat With SharedWorker</title>
+  <style>
+    .logger {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .name {
+      display: inline;
+      padding: .2em;
+      background: wheat;
+      border-radius: .2em;
+      font: 0.8rem sans-serif;
+    }
+
+    div:has(>.center) {
+      display: flex;
+      justify-content: center;
+    }
+
+    .center {
+      display: inline;
+      color: #666;
+      background: #eee;
+      border-radius: 0.5em;
+      padding: 0.3em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="logger"></div>
+  <div style="display: flex;margin: 1em 0;">
+    <textarea style="flex-grow: 1;min-height: 2em;" type="text" id="in"></textarea>
+    <button onclick="send()" style="min-width: 5em;">发送</button>
+  </div>
+  <button onclick="openNewWindow()">打开新窗口</button>
+  <script>
+    log('启动中')
+    setWindowName()
+    const worker = new SharedWorker('./ShardWorker.js')
+    console.log(worker)
+    worker.port.onmessage = function (e) {
+      switch (e.data.type) {
+        case "在线状态":
+          log(`<div class="center">${e.data.data}</div>`)
+          break
+        case "Worker错误":
+          console.error(e)
+          log("Worker错误")
+          break
+        case "Worker在线":
+          log(e.data.data)
+          break
+        case "收到信息":
+          log(`${e.data.data.name}: ${e.data.data.msg}`)
+          break
+        default:
+          console.log("回传消息", e)
+          log(`回传消息:${JSON.stringify(e.data)}`)
+      }
+    }
+    worker.port.postMessage({ type: "主窗口准备", data: window.name })
+
+    function log(text) {
+      document.querySelector('.logger').insertAdjacentHTML('beforeend', `<div>${text}</div>`)
+    }
+    function RandomID() {
+      const id = Math.random().toString(36).substring(2, 10)
+      return id
+    }
+    function openNewWindow() {
+      window.open(location.href, RandomID())
+    }
+    function setWindowName() {
+      if (window.name == '') {
+        const id = RandomID()
+        window.name = id
+        log(`当前窗口ID: ${id}`)
+      } else {
+        log(`已有ID: ${window.name}`)
+
+      }
+    }
+    function send() {
+      const input = document.querySelector('#in')
+      worker.port.postMessage({ type: "发送信息", data: { name: window.name, msg: input.value } })
+      input.value = ''
+    }
+    window.addEventListener('beforeunload', function (event) {
+      worker.port.postMessage({ type: "下线", data: window.name })
+    });
+  </script>
+
+  <script>
+    (() => {
+      const workerFuntion = () => {
+        self.onconnect = (event) => {
+          const port = event.ports[0];
+          port.onmessage = function (event) {
+            const data = event.data;
+            port.postMessage({ type: "Result", data: data });
+          };
+          setTimeout(() => {
+            port.postMessage({ type: "WorkerReady" });
+          }, 20);
+          port.start();
+        };
+      }
+      const url = URL.createObjectURL(new Blob(
+        [`(${workerFuntion.toString()})()`],
+        { type: 'application/javascript' }
+      ))
+      const worker = new SharedWorker(url)
+      worker.port.onmessage = (event) => console.log(data)
+
+      fetch(url).then(resp => resp.blob()).then(blob => {
+        const reader = new FileReader();
+        reader.onload = function () {
+          const scriptContent = reader.result;
+          console.log(scriptContent);
+        };
+        reader.readAsText(blob);
+      })
+    })
+  </script>
+</body>
+
+</html>

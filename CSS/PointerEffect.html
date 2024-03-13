@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .button {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 1px dashed red;
+      color: red;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform .1s;
+      user-select: none;
+    }
+
+    .button:active {
+      transform: translateY(4px);
+    }
+
+    @keyframes jumpX {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(var(--tx));
+      }
+    }
+
+    @keyframes jumpY {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(calc(var(--ty) / 2 - var(--th)));
+      }
+
+      100% {
+        transform: translateY(var(--ty));
+      }
+    }
+
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+      display: inline-block;
+
+      animation: jumpX .3s linear forwards;
+      transform-origin: center center;
+    }
+
+    .dotY {
+      position: absolute;
+      top: 0;
+      left: 0;
+      --th: 50px;
+      animation: jumpY .3s cubic-bezier(0.6, 0, 0, 0.6) forwards;
+    }
+
+    @keyframes disappear {
+      from {
+        transform: scale(1) translateX(var(--tx));
+        opacity: 1;
+      }
+
+      to {
+        transform: scale(3) translateX(calc(var(--tx) / 3));
+        opacity: 0;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="button">Hover Me</div>
+  </div>
+  <script>
+    let container = document.querySelector('.container');
+    let pool = []
+    function getCoin() {
+      if (pool.length <= 0) {
+        const coin = document.createElement('div')
+        const coin_inner = document.createElement('div')
+        coin.className = 'dotY'
+        coin_inner.className = 'dot'
+        coin.appendChild(coin_inner)
+        container.appendChild(coin)
+        pool.push(coin)
+      }
+      const item = pool.pop(0)
+      return [item, item.children[0]]
+    }
+    function reclaim(coin) {
+      coin.remove()
+      pool.push(coin)
+    }
+    function biu(e) {
+      const { left, right, top, bottom } = e.target.getBoundingClientRect()
+      const [centerX, centerY] = [(left + right) / 2, (top + bottom) / 2]
+      const [coin, coin_inner] = getCoin()
+      coin.style.left = centerX - 5 + 'px'
+      coin.style.top = centerY - 5 + 'px'
+      const MaxRadius = 100
+      const radius = Math.random() * MaxRadius
+      const deg = Math.random() * Math.PI * 2
+      const [tx, ty] = [Math.cos(deg) * radius, Math.sin(deg) * radius]
+      coin.style.setProperty('--tx', tx + 'px')
+      coin.style.setProperty('--ty', ty + 'px')
+      setTimeout(() => {
+        coin_inner.style.animationName = 'disappear'
+        const event = () => {
+          reclaim(coin)
+          coin_inner.removeEventListener('animationend', event)
+        }
+        coin_inner.addEventListener('animationend', event)
+      }, 2000)
+    }
+    let handle = 0
+    const btn = document.querySelector('.button')
+    btn.addEventListener('mousedown', (e) => {
+      handle = setInterval(() => biu(e), 20)
+    })
+    document.addEventListener('mouseup', () => {
+      if (handle !== 0) clearInterval(handle)
+      handle = 0
+    })
+
+  </script>
+</body>
+
+</html>

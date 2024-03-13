@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>My first three.js app</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <script type="module">
+    import * as THREE from './three.module.js';
+    // 创建场景
+    const scene = new THREE.Scene();
+    // 创建摄像机
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    // 创建渲染器
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    // 创建网格
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    // 创建材质
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 1.0 },
+        resolution: { value: new THREE.Vector2() }
+      },
+    });
+
+    // 立方体
+    const cube = new THREE.Mesh(geometry, material);
+
+    scene.add(cube);
+
+    camera.position.z = 5;
+    let deltaTime = 0
+
+    const hb = (x) => 1 + 0.1 * (2 - Math.abs(Math.sin(x / 10)))
+
+
+
+    function animate() {
+      deltaTime++;
+      const s = hb(deltaTime)
+      cube.scale.x = s
+      cube.scale.y = s
+      cube.scale.z = s
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      requestAnimationFrame(animate);
+      // 渲染此场景的此摄像机
+      renderer.render(scene, camera);
+    }
+    animate()
+
+  </script>
+</body>
+
+</html>

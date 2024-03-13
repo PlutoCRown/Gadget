@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+  <h1>Chat Room</h1>
+  <div id="messageList"></div>
+  <input type="text" id="messageInput">
+  <button onclick="sendMessage()">Send</button>
+  <script>
+    window.target = window.opener
+    const input = document.getElementById('messageInput')
+    function sendMessage() {
+      var message = input.value;
+      input.value = '';
+      addMsg(message);
+      if (target && !target.closed) {
+        target.postMessage(message, '*');
+      } else {
+        target = window.open('', '_blank');
+        target.location.href = 'Chat.html';
+        setTimeout(() => target.postMessage(message, '*'), 100)
+      }
+    }
+
+    window.addEventListener('message', function (event) {
+      if (event.origin !== window.location.origin || event.data.hello) return;
+      addMsg(event.data);
+    });
+    function addMsg(receivedMessage) {
+      var messageList = document.getElementById('messageList');
+      var messageItem = document.createElement('p');
+      messageItem.textContent = receivedMessage;
+      messageList.appendChild(messageItem);
+    }
+  </script>
+</body>
+
+</html>

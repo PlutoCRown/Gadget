@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .color-wheel {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      position: relative;
+      -webkit-user-drag: element;
+    }
+
+    .a .color-wheel {
+      background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+    }
+
+    .b .color-wheel {
+      background: conic-gradient(hsl(360, 100%, 50%), hsl(315, 100%, 50%), hsl(270, 100%, 50%), hsl(225, 100%, 50%), hsl(180, 100%, 50%), hsl(135, 100%, 50%), hsl(90, 100%, 50%), hsl(45, 100%, 50%), hsl(0, 100%, 50%));
+    }
+
+    .c .color-wheel {
+      background: conic-gradient(hsla(0, 100%, 60%, 90%), hsl(315, 100%, 63%), hsl(270, 100%, 68%), hsl(225, 100%, 65%), hsl(180, 100%, 29%), hsl(135, 100%, 31%), hsl(90, 100%, 29%), hsl(45, 100%, 32%), hsl(0, 100%, 65%));
+    }
+
+    .d .color-wheel {
+      background: conic-gradient(hsla(0, 100%, 66%), hsl(315, 100%, 63%), hsl(270, 100%, 68%), hsl(225, 100%, 65%), hsl(180, 100%, 29%), hsl(135, 100%, 31%), hsl(90, 100%, 29%), hsl(45, 100%, 32%), hsl(0, 100%, 66%));
+    }
+
+    .d {
+      filter: brightness(166%);
+    }
+
+    body {
+      flex-direction: column;
+    }
+
+    body,
+    body>div,
+    body>div>div {
+      display: flex;
+      gap: 1em;
+    }
+
+    .color-wheel::before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .light .color-wheel::before {
+      background: radial-gradient(circle at center, white, transparent);
+    }
+
+    .dark .color-wheel::before {
+      background: radial-gradient(circle at center, black, transparent);
+    }
+
+    .gray {
+      filter: grayscale(1);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="a">
+    <div class="default">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="light">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="dark">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+  </div>
+  <div class="b">
+    <div class="default">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="light">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="dark">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+  </div>
+  <div class="c">
+    <div class="default">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="light">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="dark">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+  </div>
+  <div class="d">
+    <div class="default">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="light">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+    <div class="dark">
+      <div class="color-wheel"></div>
+      <div class="color-wheel gray"></div>
+    </div>
+  </div>
+
+</body>
+
+</html>

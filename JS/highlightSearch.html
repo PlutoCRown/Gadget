@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Search Highlight Demo</title>
+  <style>
+    .highlight {
+      background-color: yellow;
+    }
+  </style>
+</head>
+
+<body>
+  <input type="text" id="searchInput" placeholder="输入关键词">
+  <p id="content">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce quis ornare eros. Nullam dapibus risus in ullamcorper
+    placerat. Phasellus blandit nisl nec purus tincidunt consequat. Sed dignissim libero vitae arcu condimentum, sed
+    fermentum lectus feugiat. Nam id semper tellus, at imperdiet mi. Ut efficitur orci a sollicitudin mollis. Mauris vel
+    leo sagittis, congue erat eu, pharetra neque. Pellentesque habitant morbi tristique senectus et netus et malesuada
+    fames ac turpis egestas. Aliquam faucibus eros nec dolor dictum porta. Proin elementum lacus non nisi aliquet
+    gravida.
+  </p>
+
+  <script>
+    const searchInput = document.getElementById("searchInput");
+    const contentElement = document.getElementById("content");
+
+    searchInput.addEventListener("input", highlightSearch);
+
+    function highlightSearch() {
+      const searchTerm = searchInput.value.trim();
+      const content = contentElement.innerText;
+
+      if (searchTerm === "") {
+        // 清除高亮效果
+        contentElement.innerHTML = content;
+      } else {
+        // 替换匹配的文本为高亮样式
+        const highlightedContent = content.replace(
+          new RegExp(searchTerm, "gi"),
+          '<span class="highlight">$&</span>'
+        );
+        contentElement.innerHTML = highlightedContent;
+      }
+    }
+  </script>
+</body>
+
+</html>

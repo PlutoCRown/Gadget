@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100vh;
+      gap: 20px;
+    }
+
+    .seletor {
+      font-size: 24px;
+      font-weight: 900;
+      align-items: center;
+      width: 10em;
+      background-color: #FFF;
+      padding: 0.2em;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2em;
+
+    }
+
+    .dyn-bar {
+      width: 100%;
+      height: 1.5em;
+      display: flex;
+    }
+
+    .frag {
+      cursor: pointer;
+      flex-grow: 1;
+      background-color: red;
+    }
+
+    .frag:not(:last-child) {
+      border-right: 0.1em solid #FFF;
+    }
+
+    .frag:hover,
+    .frag:has(~.frag:hover),
+    .frag:has(~.stay) {
+      background-color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="seletor">
+    <div class="dyn-bar">
+      <div class="frag-1 frag"></div>
+      <div class="frag-2 frag"></div>
+      <div class="frag-3 frag"></div>
+      <div class="frag-4 frag"></div>
+    </div>
+    <div class="indicator">100%</div>
+  </div>
+  <script>
+    [...document.querySelectorAll(".seletor")].forEach(bar => ((text, frag4) =>
+      bar.querySelector('.dyn-bar')
+        .addEventListener("mousemove", (e) => {
+          const { x, width } = e.currentTarget.getBoundingClientRect()
+          const precent = (e.pageX - x) / width * 100
+          if (precent < 25) {
+            text.innerText = "1/4"
+            frag4.style.display = "block"
+          } else if (precent < 33) {
+            text.innerText = "1/3"
+            frag4.style.display = "none"
+          } else if (precent < 50) {
+            text.innerText = "1/2"
+            frag4.style.display = "block"
+          } else if (precent < 67) {
+            text.innerText = "2/3"
+            frag4.style.display = "none"
+          } else if (precent < 75) {
+            text.innerText = "3/4"
+            frag4.style.display = "block"
+          } else {
+            text.innerText = "1/1"
+            frag4.style.display = "block"
+          }
+        })
+    )(
+      bar.querySelector('.indicator'),
+      bar.querySelector('.frag-4')
+    ))
+  </script>
+</body>
+
+</html>
