@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas Performance Test</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    const debounce = (() => {
+      let timeout = -1
+      return (fn, time = 200) => {
+        return (...parmas) => {
+          if (timeout !== -1) {
+            clearTimeout(timeout)
+          }
+          timeout = setTimeout(() => {
+            fn(...parmas)
+            timeout = -1
+          }, time)
+        }
+      }
+    })()
+    const canvas = document.querySelector('#canvas')
+    const ctx = canvas.getContext('2d')
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      draw()
+    }
+    window.onresize = debounce(resize)
+    setTimeout(resize, 200)
+  </script>
+  <script>
+    let offsetX = 0
+    let offsetY = 0
+    let scale = 1
+    let gridSize = 100
+    let GridSize = gridSize * scale
+
+    canvas.addEventListener('mousedown', handleMouseDown)
+    canvas.addEventListener('wheel', handleMouseWheel);
+
+    let GrabStartX, GrabStartY, originOffsetX, originOffsetY;
+    const local2world = (x, y) => [offsetX + x / scale, offsetY + y / scale]
+    const world2local = (x, y) => [(x - offsetX) * scale, (y - offsetY) * scale]
+
+    function handleMouseDown(event) {
+      window.addEventListener('mousemove', handleMouseMove)
+      window.addEventListener('mouseup', handleMouseUp)
+      originOffsetX = offsetX
+      originOffsetY = offsetY
+      GrabStartX = event.clientX
+      GrabStartY = event.clientY
+    }
+
+    function handleMouseMove(event) {
+      offsetX = originOffsetX - (event.clientX - GrabStartX) / scale;
+      offsetY = originOffsetY - (event.clientY - GrabStartY) / scale;
+      const start = performance.now()
+      draw()
+      console.log('本次平移重绘成本', (performance.now() - start).toFixed(2))
+    }
+
+    function handleMouseUp() {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+      console.log('窗口偏移', offsetX, offsetY)
+    }
+
+
+    function handleMouseWheel(event) {
+      event.preventDefault();
+
+      if (event.ctrlKey) {
+        const start = performance.now()
+        const delta = Math.sign(event.deltaY);
+        const [MouseWorldX, MouseWorldY] = local2world(event.clientX, event.clientY)
+        let originScale = scale
+        if (delta > 0) {
+          scale -= 0.1;
+        } else {
+          scale += 0.1;
+        }
+        // 限制最小和最大缩放范围
+        scale = Math.max(0.1, Math.min(2, scale));
+        if (originScale === scale) return
+        // 调整格子渲染大小
+        GridSize = gridSize * scale
+        // 保持鼠标的世界坐标不变
+        offsetX = MouseWorldX - event.clientX / scale
+        offsetY = MouseWorldY - event.clientY / scale
+        // console.log("当前缩放", scale)
+        drawOffscreen()
+        console.log('本次缩放重绘成本', (performance.now() - start).toFixed(2))
+      } else {
+        offsetX += event.deltaX * 0.3
+        offsetY += event.deltaY * 0.3
+      }
+      draw()
+    }
+  </script>
+  <script>
+      const MapRange = 10000
+      const randomCoords = new Array(10000).fill(0).map(() => [Math.random() * MapRange, Math.random() * MapRange])
+      const offscreenCanvas = document.createElement('canvas')
+      const Size = 100
+      const offscreenCtx = offscreenCanvas.getContext('2d')
+      function drawOffscreen() {
+        offscreenCanvas.width = (MapRange + Size) * scale
+        offscreenCanvas.height = (MapRange + Size) * scale
+        offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+        randomCoords.forEach(rect => {
+          offscreenCtx.fillRect(rect[0] * scale, rect[1] * scale, Size * scale, Size * scale)
+        })
+      }
+      drawOffscreen()
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath()
+      // 这里要转屏幕坐标了
+      const startX = (-offsetX % gridSize) * scale - GridSize
+      const startY = (-offsetY % gridSize) * scale - GridSize
+      const endX = startX + canvas.width + GridSize * 4
+      const endY = startY + canvas.height + GridSize * 4
+      ctx.moveTo(startX, startY)
+      //    L_______
+      //    _______|
+      for (let i = 0; i <= canvas.height / GridSize + 2; i += 2) {
+        ctx.lineTo(startX, startY + i * GridSize)
+        ctx.lineTo(endX, startY + i * GridSize)
+        ctx.lineTo(endX, startY + (i + 1) * GridSize)
+        ctx.lineTo(startX, startY + (i + 1) * GridSize)
+      }
+      // ---
+      // | |
+      // | L
+      for (let i = 0; i <= canvas.width / GridSize + 2; i += 2) {
+        ctx.lineTo(startX + i * GridSize, startY)
+        ctx.lineTo(startX + (i + 1) * GridSize, startY)
+        ctx.lineTo(startX + (i + 1) * GridSize, endY)
+        ctx.lineTo(startX + (i + 2) * GridSize, endY)
+      }
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ccc';
+      ctx.stroke();
+
+      const offscreenDraw = true
+      if (offscreenDraw) {
+        // // 离屏绘制
+        const [x, y] = world2local(0, 0)
+        ctx.drawImage(offscreenCanvas, x, y);
+      } else {
+        // 直接绘制
+        randomCoords.forEach(rect => {
+          const [x, y] = world2local(rect[0], rect[1])
+          if (x <= -Size * scale || y <= -Size * scale || x >= canvas.width || y >= canvas.height) {
+
+          } else {
+            ctx.fillRect(x, y, Size * scale, Size * scale);
+          }
+        })
+
+        const [x2, y2] = world2local(-5, -5)
+        ctx.fillRect(x2, y2, 10 * scale, 10 * scale);
+      }
+    }
+  </script>
+</body>
+
+</html>

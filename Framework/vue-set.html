@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vue.set会覆盖已有非响应属性吗</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <p>{{ message.someThing }}</p>
+    <p>{{ message.animationName }}</p>
+    <button @click="changeMessage">添加属性</button>
+    <button @click="removeAnimation">移除属性</button>
+    <button @click="addAttr">设置为响应</button>
+  </div>
+
+  <script>
+    new Vue({
+      el: "#app",
+      data: {
+        message: {
+          someThing: "123",
+        },
+      },
+      methods: {
+        changeMessage() {
+          this.message.someThing = "Updated Message";
+          this.message.animationName = 1;
+          console.log(this.message);
+        },
+        removeAnimation() {
+          delete this.message.animationName;
+          console.log(this.message);
+        },
+        addAttr() {
+          Vue.set(this.message, "animationName", this.message.animationName);
+          console.log(this.message);
+        },
+      },
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bizier</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+      background: #f1f1f1;
+    }
+
+    .default {
+      cursor: default;
+    }
+
+    .grab {
+      cursor: grab;
+    }
+
+    .grabbing {
+      cursor: grabbing;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" class="default"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const points = [
+      { x: 100, y: 100 },
+      { x: 300, y: 100 },
+      { x: 300, y: 300 },
+      { x: 100, y: 300 }
+    ];
+    const classMove = (fromClass, toClass) => {
+      if (canvas.classList.contains(fromClass)) {
+        canvas.classList.remove(fromClass)
+        canvas.classList.add(toClass)
+      }
+    }
+
+    let selectedPoint = null;
+    canvas.addEventListener('mousedown', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        const distance = Math.sqrt(Math.pow(mouseX - point.x, 2) + Math.pow(mouseY - point.y, 2));
+
+        if (distance <= 10) {
+          selectedPoint = point;
+          classMove("default", "grab")
+          break;
+        } else {
+          classMove("grab", "default")
+        }
+      }
+    });
+
+    canvas.addEventListener('mousemove', (event) => {
+      if (selectedPoint) {
+        classMove("grab", "grabbing")
+        const rect = canvas.getBoundingClientRect();
+        selectedPoint.x = event.clientX - rect.left;
+        selectedPoint.y = event.clientY - rect.top;
+        drawCanvas();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      selectedPoint = null;
+      classMove("grabbing", "grab")
+    });
+
+    function drawCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#ff0000';
+      for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      ctx.bezierCurveTo(points[1].x, points[1].y, points[2].x, points[2].y, points[3].x, points[3].y);
+      ctx.stroke();
+    }
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // 初始化绘制
+    drawCanvas();
+  </script>
+</body>
+
+</html>
