@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            height: 100vh;
+            background-color: antiquewhite;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .detechPoint {
+            height: 40vh;
+            background-color: blueviolet;
+            opacity: 0.7;
+            position: sticky;
+            top: 99px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container"></div>
+    <div class="detechPoint"></div>
+    <div class="container"></div>
+</body>
+<script>
+    const text = document.querySelector(".text");
+    const obs = new IntersectionObserver((entries) => {
+        console.log('通知', entries[0].boundingClientRect)
+        if (entries[0].intersectionRatio != 1 && entries[0].boundingClientRect.y < 100) {
+            entries[0].target.style.backgroundColor = 'red'
+        } else {
+            entries[0].target.style.backgroundColor = 'green'
+        }
+    }, { rootMargin: '-100px 0px 0px 0px', threshold: [1] })
+    obs.observe(document.querySelector(".detechPoint"));
+</script>
+
+</html>

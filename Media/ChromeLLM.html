@@ -112,8 +112,8 @@
         ];
         async function makeTitle  (content) {
             const title = document.getElementById('title');
-            const session = await window.ai.createTextSession();
-            const resp = session.promptStreaming(`Please generate a short title for follow question: ${content}`); 
+            const session = await window.ai.assistant.create();
+            const resp = session.promptStreaming(`Please describe this problem in a few simple words: ${content}`); 
             for await (const response of resp) {
                 title.innerHTML = `<h1>${response}</h1>`;
             }
@@ -126,8 +126,8 @@
             const title = document.getElementById('title');
 
             try {
-                const aiStatus = await window.ai.canCreateTextSession();
-                title.textContent = `Chat With AI (${aiStatus})`;
+                const aiStatus = await window.ai.assistant.capabilities()
+                title.textContent = `Chat With AI (${aiStatus.available})`;
                 renderChat();
             } catch (error) {
                 title.innerHTML = `
@@ -138,9 +138,11 @@
                         <a href="chrome://flags" target="_blank">chrome://components/</a>
                     </p>
                 `;
+                chatInput.disabled = true
             }
 
             function renderChat() {
+                chatBox.children = [chatBox.children]
                 chatBox.innerHTML = '<div id="title"><h1>' + title.textContent + '</h1></div>';
                 window.chat.forEach(message => {
                     const messageElement = document.createElement('div');
@@ -169,7 +171,7 @@
 
                     if (!window.chatSession) {
                         try {
-                            window.chatSession = await window.ai.createTextSession();
+                            window.chatSession = await window.ai.assistant.create();
                         } catch (error) {
                             const errorMessage = 'Error creating AI session';
                             window.chat.push({ is: 'ai', content: errorMessage });

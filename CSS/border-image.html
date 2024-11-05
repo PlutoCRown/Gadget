@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Border with Transparent Background</title>
+    <style>
+body {
+  background-color: #031016;
+}
+
+.radius {
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.gradient-border-bg {
+  border: 5px solid;
+  border-image: linear-gradient(45deg, purple, orange) 1;
+  padding: 1rem;
+}
+    </style>
+</head>
+<body>
+    <div class="radius">
+        <div class="gradient-border-bg"></div>
+      </div>
+</body>
+</html>

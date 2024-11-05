@@ -10,7 +10,7 @@
             const obs = new IntersectionObserver(
                 (entries, observer) => {
                     entries[0].target.style.backgroundColor = `rgb(${entries[0].intersectionRatio * 255},0,0)`;
-                    text.innerHTML = new Date().getMilliseconds();
+                    text.innerHTML = `刷新：${new Date().getMilliseconds()} ｜ 比例：${entries[0].intersectionRatio} `
                 },
                 {   // 祖先元素|视口元素
                     // root: document.querySelector(".view"),

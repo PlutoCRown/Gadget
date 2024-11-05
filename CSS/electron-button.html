@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .xbtn {
+            width: 2em;
+            height: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1.5em;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            --offsetX: 0%;
+            --offsetY: 0%;
+            transform: translate(calc(-50% + var(--offsetX)), calc(-50% + var(--offsetY)));
+            background-color: black;
+            border: 1px solid #FFF;
+            color: #FFF;
+            line-height: 1em;
+            letter-spacing: 0em;
+            transition: transform .3s;
+            font-size: inherit;
+            overflow: hidden;
+        }
+
+        .xbtn::after {
+            position: absolute;
+            top: var(--reachY);
+            left: var(--reachX);
+            width: 10%;
+            height: 10%;
+            border-radius: 100%;
+            content: '';
+            background-color: #FFF;
+            mix-blend-mode: difference;
+            transition: all .3s;
+            opacity: 0;
+        }
+
+        .xbtn:hover:after {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 1;
+        }
+
+        .xposc {
+            width: 2em;
+            height: 2em;
+            /* background-color: blue; */
+            position: relative;
+        }
+
+        .xwrapper {
+            position: absolute;
+            width: 10em;
+            height: 10em;
+            border-radius: 5em;
+            /* background-color: red;
+            opacity: 0.2; */
+            font-size: inherit;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            gap: 1em;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background-color: black;
+            font-size: 24px;
+        }
+
+        #mousePositionDiv {
+            color: #FFF;
+        }
+        pre {
+            color: #FFF;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="xposc" style="font-size: 32px;">
+        <div class="xwrapper">
+            <button class="xbtn">+</button>
+        </div>
+    </div>
+    <pre>Button</pre>
+    <div class="xposc" style="font-size: 32px;">
+        <div class="xwrapper">
+            <button class="xbtn">-</button>
+        </div>
+    </div>
+    <script>
+        [...document.querySelectorAll('.xwrapper')].forEach((el) => {
+            const btn = el.querySelector('.xbtn')
+            let center = {}
+            const MoveListener = (e) => {
+                const relativePos = { x: e.clientX - center.cx, y: e.clientY - center.cy }
+                const distance = relativePos.x ** 2 + relativePos.y ** 2
+                const curve = x => x
+                const scale = 1 - curve(distance / center.r ** 2)
+                btn.style.setProperty('--offsetX', relativePos.x * scale + 'px')
+                btn.style.setProperty('--offsetY', relativePos.y * scale + 'px')
+                enterControl(e)
+            }
+            el.addEventListener('mouseenter', () => {
+                center = el.getBoundingClientRect()
+                center.cx = center.x + center.width / 2
+                center.cy = center.y + center.height / 2
+                center.r = center.width / 2
+                document.documentElement.addEventListener('mousemove', MoveListener)
+            })
+            el.addEventListener('mouseleave', () => {
+                document.documentElement.removeEventListener('mousemove', MoveListener)
+                btn.style.setProperty('--offsetX', '0px')
+                btn.style.setProperty('--offsetY', '0px')
+            })
+            const enterControl = (e) => {
+                const pos = btn.getBoundingClientRect()
+                btn.style.setProperty('--reachX', (e.clientX - pos.x) * 1.5 + 'px')
+                btn.style.setProperty('--reachY', (e.clientY - pos.y) * 1.5 + 'px')
+            }
+            btn.addEventListener('mouseleave', enterControl)
+        })
+    </script>
+</body>
+
+</html>

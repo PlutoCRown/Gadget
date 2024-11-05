@@ -125,29 +125,39 @@
     allowClose = false
     thres = 0
     closeThres = window.innerHeight / 8
+    
     content.addEventListener('touchmove', (e) => {
       // console.log(e.targetTouches[0].screenY)
       if (swiping) {
         let currentY = e.targetTouches[0].screenY
         const isPulling = currentY > offset.y
         if (isPulling) {
+          // console.log('正在拉')
           thres = currentY - offset.y
           content.style.transform = `translateY(${allowClose ? thres : Math.sqrt(thres * 3)}px)`
           content.setAttribute('data-thres', thres)
         } else {
-          console.log('让他滚')
+          // console.log('让他滚')
           content.style.overflowY = 'scroll'
           content.scrollTo({ top: offset.y - currentY })
         }
         return
-      }
-      // 触顶
-      if (content.scrollTop == 0) {
-        offset.y = e.targetTouches[0].screenY
+      } else if (content.scrollTop == 0) {
+      // 第一次先不触发
+        if(!offset.y) {
+          offset.y = e.targetTouches[0].screenY
+          return
+        } 
+        // 触发
+        if(e.targetTouches[0].screenY - offset.y < 0.5) {
+          console.log(e.targetTouches[0].screenY - offset.y)
+          return
+        }
         console.log('触顶')
         swiping = true
         content.style.overflowY = 'hidden'
         content.style.transition = 'unset'
+        
         // 处理是否接受关闭
         if (e.targetTouches[0].screenX > window.innerWidth / 2) {
           allowClose = true
@@ -158,17 +168,19 @@
     })
     content.addEventListener('touchend', () => {
       if (content.getAttribute('data-thres') > closeThres && allowClose) {
-        console.log('关闭')
-        content.setAttribute('data-thres',null)
+        // console.log('关闭')
+        content.setAttribute('data-thres', null)
         close()
       } else {
-        console.log('不许关')
+        // console.log('不许关')
         content.style.transform = `translateY(0px)`
       }
+      offset = {}
       content.style.overflowY = 'scroll'
       content.style.transition = 'transform .3s'
       swiping = false
     })
+
   </script>
 </body>
 
