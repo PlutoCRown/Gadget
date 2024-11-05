@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .model {
+      position: absolute;
+      width: 100%;
+      height: 0px;
+      z-index: 1;
+      bottom: 0;
+    }
+
+    .model.open,
+    .model.show {
+      height: 100vh;
+    }
+
+    .show:not(.open) {
+      pointer-events: none;
+    }
+
+    .mask {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      opacity: 0;
+      transition: all .5s;
+    }
+
+    .open .mask {
+      opacity: 0.7;
+    }
+
+    .content {
+      --maxheight: 55vh;
+      width: 100%;
+      height: var(--maxheight);
+      position: absolute;
+      bottom: 0;
+      transform: translateY(var(--maxheight));
+      transition: transform .3s;
+      border-radius: 12px 12px 0 0;
+      overflow-y: scroll;
+    }
+
+    .open .content {
+      transform: translateY(0);
+    }
+
+    .box {
+      width: 100%;
+      height: 20vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <button>Open</button>
+  <div class="model">
+    <div class="mask"></div>
+    <div class="content">
+      <div>
+        <div class="box" style="background-color: chartreuse;">用手机模式看</div>
+        <div class="box" style="background-color:aqua;">⬇️关不掉 ｜ 下拉关闭 ｜ 能关掉⬇️</div>
+        <div class="box" style="background-color: red;"></div>
+        <div class="box" style="background-color: greenyellow;"></div>
+        <div class="box" style="background-color: green;"></div>
+        <div class="box" style="background-color: gray;"></div>
+        <div class="box" style="background-color: black;"></div>
+        <div class="box" style="background-color: blue;"></div>
+        <div class="box" style="background-color: blueviolet;"></div>
+        <div class="box" style="background-color: brown;"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.visible = false
+    window.maxheight = '50vh'
+    const button = document.querySelector('button')
+    const model = document.querySelector(".model")
+    const mask = document.querySelector(".mask")
+    const content = document.querySelector(".content")
+    const open = () => {
+      window.visible = true
+      model.classList.add('open')
+      model.classList.add('show')
+    }
+    const close = () => {
+      window.visible = false
+      content.style.transform = null
+      model.classList.remove('open')
+      setTimeout(() => {
+        model.classList.remove('show')
+      }, 500)
+    }
+    button.onclick = () => {
+      if (window.visible) close()
+      else open()
+    }
+    mask.onclick = close
+    // open()
+
+    offset = {}
+    swiping = false
+    allowClose = false
+    thres = 0
+    closeThres = window.innerHeight / 8
+    content.addEventListener('touchmove', (e) => {
+      // console.log(e.targetTouches[0].screenY)
+      if (swiping) {
+        let currentY = e.targetTouches[0].screenY
+        const isPulling = currentY > offset.y
+        if (isPulling) {
+          thres = currentY - offset.y
+          content.style.transform = `translateY(${allowClose ? thres : Math.sqrt(thres * 3)}px)`
+          content.setAttribute('data-thres', thres)
+        } else {
+          console.log('让他滚')
+          content.style.overflowY = 'scroll'
+          content.scrollTo({ top: offset.y - currentY })
+        }
+        return
+      }
+      // 触顶
+      if (content.scrollTop == 0) {
+        offset.y = e.targetTouches[0].screenY
+        console.log('触顶')
+        swiping = true
+        content.style.overflowY = 'hidden'
+        content.style.transition = 'unset'
+        // 处理是否接受关闭
+        if (e.targetTouches[0].screenX > window.innerWidth / 2) {
+          allowClose = true
+        } else {
+          allowClose = false
+        }
+      }
+    })
+    content.addEventListener('touchend', () => {
+      if (content.getAttribute('data-thres') > closeThres && allowClose) {
+        console.log('关闭')
+        content.setAttribute('data-thres',null)
+        close()
+      } else {
+        console.log('不许关')
+        content.style.transform = `translateY(0px)`
+      }
+      content.style.overflowY = 'scroll'
+      content.style.transition = 'transform .3s'
+      swiping = false
+    })
+  </script>
+</body>
+
+</html>
