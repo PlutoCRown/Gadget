@@ -139,17 +139,17 @@ const commandEncoder = device.createCommandEncoder();
 const passEncoder = commandEncoder.beginComputePass();
 passEncoder.setPipeline(computePipeline);
 passEncoder.setBindGroup(0, bindGroup);
-const workgroupCountX = Math.ceil(firstMatrix[0] / 8);
-const workgroupCountY = Math.ceil(secondMatrix[1] / 8);
+const workgroupCountX = Math.ceil(Matrix_left[0] / 8);
+const workgroupCountY = Math.ceil(Matrix_right[1] / 8);
 passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY);
 passEncoder.end();
 /** IX. 读取结果 */
 const Result = device.createBuffer({
-  size: resultMatrixBuffer,
+  size: Matrix.size,
   usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
 });
-commandEncoder.copyBufferToBuffer(Matrix, 0, Result, 0, resultMatrixBuffer);
+commandEncoder.copyBufferToBuffer(Matrix, 0, Result, 0, Matrix.size);
 const gpuCommands = commandEncoder.finish();
 device.queue.submit([gpuCommands]);
-await gpuReadBuffer.mapAsync(GPUMapMode.READ);
-console.log(new Float32Array(gpuReadBuffer.getMappedRange()));
+await Result.mapAsync(GPUMapMode.READ);
+console.log(new Float32Array(Result.getMappedRange()));
