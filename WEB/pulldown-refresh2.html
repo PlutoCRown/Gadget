@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            scrollbar-width: 0;
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .loading {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+        }
+
+        .box {
+            width: 100%;
+            height: 100px;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-height: 100vh;
+            overflow-y: scroll;
+        }
+        .rotate {
+            animation: rotate .3s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 80 + 60 -->
+        <div style="display: flex;justify-content: center; padding-top: 80px; z-index: 1;position: relative;">
+            <div class="loading"></div>
+        </div>
+        <div class="list">
+            <div class="box">1</div>
+            <div class="box">2</div>
+            <div class="box">3</div>
+            <div class="box">4</div>
+            <div class="box">5</div>
+            <div class="box">6</div>
+            <div class="box">7</div>
+            <div class="box">8</div>
+            <div class="box">9</div>
+            <div class="box">10</div>
+            <div class="box">11</div>
+            <div class="box">12</div>
+            <div class="box">13</div>
+            <div class="box">14</div>
+            <div class="box">15</div>
+            <div class="box">16</div>
+            <div class="box">17</div>
+            <div class="box">18</div>
+            <div class="box">19</div>
+            <div class="box">20</div>
+        </div>
+    </div>
+    <script>
+        // 
+        const el = document.querySelector('.loading')
+        const list = document.querySelector('.list')
+        const container = document.querySelector('.container')
+        let preTop = 0
+        let startTop = 0
+        let isHover = false
+        container.scrollTo({ top: 50 + 80 })
+        container.addEventListener('scroll', (e) => {
+            el.style.transform = `scale(${Math.max(0, 1 - container.scrollTop / 60)})`
+            if(container.scrollTop < preTop && container.scrollTop < 50+80 && !isHover){
+                console.log('禁止滑动',startTop)
+                container.scrollTo({ top: 50 + 80 ,behavior: startTop <= 50+80 ? 'smooth':'auto'})
+            }
+            preTop = container.scrollTop
+        },{passive:true})
+        container.addEventListener('touchstart',(e)=>{
+            startTop = container.scrollTop 
+            isHover = true
+        })
+        container.addEventListener('touchend',(e)=>{
+            // 自己定义的10
+            if(e.currentTarget.scrollTop < 10){
+                console.log('应该触发刷新')
+                el.classList.add('rotate')
+                container.scrollTo({ top:0,behavior:'smooth'})
+                setTimeout(()=>{
+                container.scrollTo({ top:50 + 80,behavior:'smooth'})
+                    el.classList.remove('rotate')
+                    isHover = false
+                },500)
+                return
+            } else if(e.currentTarget.scrollTop < 50 + 80){
+                console.log('滚一半应该恢复')
+                // 有一个bug，如果下拉惯性松手，smooth会被 禁止滑动 覆盖掉
+                container.scrollTo({ top:50 + 80,behavior:'smooth'})
+            }
+            isHover = false
+            
+        })
+    </script>
+</body>
+
+</html>
