@@ -77,6 +77,10 @@
       left: 0;
       position: absolute;
     }
+
+    #dropArea {
+      z-index: 2;
+    }
   </style>
 
 </head>
@@ -88,6 +92,7 @@
       <div id="replace-background" style="z-index: -1;"></div>
       <div id="transparent-grid"></div>
       <canvas id="csv" style="position: absolute;top: 0;left: 0;z-index: 1;" width="200" height="200"></canvas>
+      <canvas id="gray" style="position: absolute;top: 0;left: 0;z-index: 1;" width="200" height="200"></canvas>
     </div>
     <div id="op" class="flex col">
       <div>
@@ -96,11 +101,11 @@
       </div>
       <div>
         <label for="">BackGroundFilter</label>
-        <input type="color" name="" value="#FFFFFF">
+        <input type="color" name="" value="#FFFFFF" id="filter-color">
       </div>
       <div>
         <label for="">FilterThr</label>
-        <input type="number" name="" max="255" value="1">
+        <input type="number" name="" max="255" value="255" id="filter-thr">
       </div>
       <div>
         <label for="">ReplaceBackground</label>
@@ -110,22 +115,47 @@
     </div>
   </div>
   <script>
+    /** @type {HTMLCanvasElement} */
     const canvas = document.querySelector('#csv');
-    const ctx = canvas.getContext('2d');
+    const gray = document.querySelector('#gray');
 
+    const ctx = canvas.getContext('2d');
+    const grayCtx = gray.getContext('2d');
+    let filterColor = [255, 255, 255]
+    let FilterThr = 255
+    const norm = 1
+    const Distance = (a, b) => Math.pow(Math.abs(a - b), norm)
+    const map = new Map()
     function toCanvas(img) {
+      console.log('重绘')
       canvas.width = img.width;
       canvas.height = img.height;
-      console.log(img.width, img.height)
+      gray.width = img.width;
+      gray.height = img.height;
+      gray.style.top = img.height + 20 + 'px'
       ctx.drawImage(img, 0, 0, img.width, img.height);
+
       const imageData = ctx.getImageData(0, 0, img.width, img.height)
       const data = imageData.data
+      const grayData = new Uint8ClampedArray(data.length / 4)
       for (let i = 0; i < data.length / 4; i++) {
-        data[i * 4 + 3] = Math.min(255, (255 * 3 - data[i * 4] - data[i * 4 + 1] - data[i * 4 + 2]))
+        grayData[i] = Math.min(255, (
+          Distance(filterColor[0], data[i * 4]) +
+          Distance(filterColor[1], data[i * 4 + 1]) +
+          Distance(filterColor[2], data[i * 4 + 2])
+        ) * FilterThr / 255)
+        data[i * 4 + 3] = grayData[i]
       }
       const newImage = new ImageData(data, img.width, img.height)
+      const garyImageData = new Uint8ClampedArray(data.length);
+
+      grayData.map(i => map.set(i, (map.get(i) || 0) + 1))
+      console.log(map)
+      grayData.forEach((v, i) => garyImageData.set([v, v, v, 255], i * 4))
+      const garyImage = new ImageData(garyImageData, img.width, img.height)
       window.transparentImage = newImage
       ctx.putImageData(newImage, 0, 0);
+      grayCtx.putImageData(garyImage, 0, 0);
       img.style.opacity = 0
       return canvas;
     }
@@ -146,7 +176,7 @@
         if (file.type.startsWith('image/')) {
           const reader = new FileReader();
           reader.onload = function (e) {
-            const img = document.createElement('img');
+            window.img = document.createElement('img');
             img.src = e.target.result;
             dropArea.parentNode.replaceChild(img, dropArea);
             setTimeout(() => {
@@ -168,6 +198,20 @@
       dropArea.classList.remove("highlight");
     });
     dropArea.addEventListener('drop', handleDrop);
+
+    document.getElementById("filter-color").oninput = (v) => {
+      const hex = v.target.value.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      filterColor = [r, g, b];
+      toCanvas(window.img)
+    }
+
+    document.getElementById("filter-thr").oninput = (v) => {
+      FilterThr = v.target.value
+      toCanvas(window.img)
+    }
     const ReplaceBackground = document.querySelector("#replace-background")
     document.getElementById("background-color").oninput = (v) => {
       ReplaceBackground.style.backgroundColor = v.target.value
@@ -176,12 +220,12 @@
       ReplaceBackground.style.opacity = v.target.value / 100
     }
     document.getElementById("hue").oninput = (v) => {
-      console.log(v.target.value)
       hueChange('hue-rotate(' + v.target.value + 'deg)')
     }
 
   </script>
   <script>
+    // 背景设置（如果你ReplaceBackground有透明度就会透出这一层
     const light = 0 // 亮色
     const dark = 255 // 暗色
     const opca = 64 // 透明度

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .expander {
+      display: grid;
+      grid-template-rows: 0fr;
+      overflow: hidden;
+      transition: grid-template-rows .2s;
+    }
+
+    .expander-content {
+      min-height: 0;
+    }
+
+    .expander.expanded {
+      grid-template-rows: 1fr;
+    }
+  </style>
+</head>
+
+<body>
+  <button onclick="document.getElementById('expander').classList.toggle('expanded')">toggle</button>
+  <div>Something before 🙃</div>
+  <div class="expander" id="expander">
+    <div class="expander-content">
+      This content should…<br />
+      toggle! 👻
+    </div>
+  </div>
+  <div>Something after 🙂</div>
+</body>
+
+</html>
