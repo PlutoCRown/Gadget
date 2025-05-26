@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Touch with Snap Rotation</title>
+    <style>
+        body {
+            margin: 1em;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            /* aspect-ratio: 3/4; */
+            height: 90vh;
+            position: relative;
+        }
+        html {
+            overflow: hidden;
+        }
+
+        img {
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            touch-action: none;
+            /* 禁止默认触控行为 */
+            transition: transform .3s ease-in-out;
+            transform-origin: top left;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="log" style="z-index: 1;position: relative;color:#FFF;"></div>
+    <img src="https://txcdn-test-a1art.xiaopiu.com/assets/images/app_1921867672198709249/1921867672215486465/b36a0062-8ff0-4005-811a-2050356935aa.jpeg?"
+        id="target" alt="Demo Image">
+    <script>
+        const img = document.getElementById('target');
+        let initialDistance = 0; // 初始两点距离
+        let initialScale = 1; // 初始缩放比例
+        let initialAngle = 0; // 初始旋转角度
+        let lastCenter = { x: 0, y: 0 }; // 初始中心点
+        let startX = 0, startY = 0; // 单指平移起点
+        let isTransforming = false; // 是否正在变换
+        let isPanning = false; // 是否正在平移
+        const baseT = {
+            translateX: 0,
+            translateY: 0,
+        }
+        let currentTransform = {
+            scale: 1,
+            translateX: 0,
+            translateY: 0,
+            rotate: 0,
+        };
+
+        function getDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function getCenter(touches) {
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2,
+            };
+        }
+
+        function getAngle(touches) {
+            const dx = touches[1].clientX - touches[0].clientX;
+            const dy = touches[1].clientY - touches[0].clientY;
+            return Math.atan2(dy, dx) * (180 / Math.PI); // 转换为角度
+        }
+
+        function applyTransform() {
+            const { scale, translateX, translateY, rotate } = currentTransform;
+            img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; //rotate(${rotate}deg)
+            log.innerText = JSON.stringify({ currentTransform, isPanning, isTransforming }, null, 2);
+        }
+        function getRenderImagOffset(img) {
+            const { naturalWidth, naturalHeight, clientWidth, clientHeight } = img;
+            const realAspectRatio = naturalWidth / naturalHeight;
+            const containerAspectRatio = clientWidth / clientHeight;
+            if (realAspectRatio > containerAspectRatio) {
+                // 上下有白
+                const scale = clientWidth / naturalWidth;
+                const y = (clientHeight - naturalHeight * scale) / 2 || 0;
+                return { width: clientWidth, x: 0, y, height: clientHeight - (2 * y) };
+            } else {
+                const scale = clientHeight / naturalHeight;
+                const x = (clientWidth - naturalWidth * scale) / 2 || 0;
+                return { width:clientHeight -(2 * x), height: clientHeight, y: 0, x };
+            }
+        }
+        img.onload = () => {
+            const { x, y,width,height } = getRenderImagOffset(img)
+            img.style.width = width
+            img.style.height = height
+            console.log('基础偏移',x,y,width,height)
+            baseT.translateX = x;
+            baseT.translateY = y;
+            applyTransform();
+        }
+
+
+        img.addEventListener('touchstart', (e) => {
+            img.style.transitionDuration = '0s'
+            if (e.touches.length === 2) {
+                isTransforming = true;
+                isPanning = false;
+                initialDistance = getDistance(e.touches);
+                lastCenter = getCenter(e.touches);
+                initialScale = currentTransform.scale;
+                initialAngle = getAngle(e.touches);
+            } else if (e.touches.length === 1) {
+                isTransforming = false;
+                isPanning = true;
+                startX = e.touches[0].clientX - currentTransform.translateX;
+                startY = e.touches[0].clientY - currentTransform.translateY;
+                console.log(startX, startY)
+            }
+        });
+
+        img.addEventListener('touchmove', (e) => {
+            if (isTransforming && e.touches.length >= 2) {
+                e.preventDefault(); // 防止页面滚动
+                const currentDistance = getDistance(e.touches);
+                const currentCenter = getCenter(e.touches);
+                const currentAngle = getAngle(e.touches);
+
+                // 计算缩放比例
+                const scaleChange = currentDistance / initialDistance;
+                const newScale = initialScale * scaleChange;
+
+                // 计算中心点变化对位置的影响（为了缩放围绕中心）
+                const dx = currentCenter.x - lastCenter.x;
+                const dy = currentCenter.y - lastCenter.y;
+
+                // 缩放中心位移修正：让缩放围绕 center 而非 (0,0)
+                const scaleOffsetX = (currentCenter.x - currentTransform.translateX) * (1 - newScale / currentTransform.scale);
+                const scaleOffsetY = (currentCenter.y - currentTransform.translateY) * (1 - newScale / currentTransform.scale);
+
+                currentTransform.translateX += dx + scaleOffsetX;
+                currentTransform.translateY += dy + scaleOffsetY;
+
+                currentTransform.scale = newScale;
+
+                // 计算旋转角度
+                const angleChange = currentAngle - initialAngle;
+                currentTransform.rotate += angleChange;
+                initialAngle = currentAngle; // 更新初始角度
+
+                lastCenter = currentCenter; // 更新中心点
+
+                applyTransform();
+            } else if (e.touches.length === 1 && isPanning) {
+                currentTransform.translateX = e.touches[0].clientX - startX;
+                currentTransform.translateY = e.touches[0].clientY - startY;
+                applyTransform();
+            }
+        });
+
+        img.addEventListener('touchend', (e) => {
+            img.style.transitionDuration = '.3s'
+            if (e.touches.length === 0 && isTransforming) {
+                // 吸附旋转角度
+                currentTransform.rotate = Math.round(currentTransform.rotate / 180) * 180;
+                isTransforming = false;
+            } else if (e.touches.length === 0 && isPanning) {
+                isPanning = false;
+            }
+            if (currentTransform.scale < 1) {
+                currentTransform.scale = 1
+                currentTransform.translateX = 0
+                currentTransform.translateY = 0
+            }
+            // 吸附归正
+            else if (currentTransform.scale >= 1) {
+                if (currentTransform.translateX > 0) currentTransform.translateX = 0
+                if (currentTransform.translateY > 0) currentTransform.translateY = 0
+                // 左边溢出 && (溢出量 > 缩放后的图片宽 - 原图宽) => 右边溢出
+                if (currentTransform.translateX < 0 && (
+                    (img.offsetWidth - currentTransform.translateX) > (img.offsetWidth * currentTransform.scale)
+                )) currentTransform.translateX = -(img.offsetWidth * currentTransform.scale - img.offsetWidth)
+                if (currentTransform.translateY < 0 && (
+                    (img.offsetHeight - currentTransform.translateY) > (img.offsetHeight * currentTransform.scale)
+                )) currentTransform.translateY = -(img.offsetHeight * currentTransform.scale - img.offsetHeight)
+            }
+            applyTransform();
+        });
+        applyTransform();
+    </script>
+</body>
+
+</html>
