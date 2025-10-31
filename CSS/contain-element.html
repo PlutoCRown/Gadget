@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<script>
+			window.addEventListener('mousemove', (e) => {
+				document.getElementById('block-restrict').style.width = e.clientX + 'px';
+				document.getElementById('block-restrict').style.height = e.clientY + 'px';
+			});
+		</script>
+		<style>
+			body {
+				max-width: 100vw;
+				max-height: 100vh;
+				overflow: hidden;
+				margin: 0;
+			}
+			#block-restrict {
+				border: 1px solid red;
+				display: flex;
+				align-items: center;
+			}
+			#inline-restrict {
+				aspect-ratio: 9/16;
+				width: 100%;
+				max-height: 100%;
+				/* border: 1px solid blue; */
+				display: flex;
+				align-items: center;
+				flex-direction: column;
+			}
+
+			#content {
+				aspect-ratio: 9/16;
+				height: 100%;
+				max-width: 100%;
+				background-color: #0004;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="block-restrict">
+			<div id="inline-restrict">
+				<div id="content"></div>
+			</div>
+		</div>
+	</body>
+</html>

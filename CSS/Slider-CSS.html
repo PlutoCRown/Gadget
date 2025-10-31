@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+
+    </script>
+    <style>
+        .slider {
+            height: 100%;
+            font-size: 20em;
+            text-align: center;
+            color: #FFF3;
+            scroll-snap-align: center;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .wrapper {
+            max-height: 100vh;
+            height: 100vh;
+            overflow: auto;
+            scroll-snap-type: y mandatory;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0;
+        }
+
+        .slider {
+            border: 10px solid #0002;
+            box-sizing: border-box;
+            transform: scale(0.8);
+            transition: transform .3s;
+        }
+
+        .slider.active {
+            transform: scale(1);
+        }
+    </style>
+    <script>
+        setTimeout(() => {
+            var cur = 0;
+            var container = document.querySelector(".wrapper")
+            const slides = container.querySelectorAll(".slider")
+            container.addEventListener("scroll", (e) => {
+                const scrollTop = container.scrollTop;
+                const newCur = Math.round(scrollTop / window.innerHeight);
+                if (newCur !== cur) {
+                    slides[cur].classList.remove("active");
+                    slides[newCur].classList.add("active");
+                    cur = newCur;
+                }
+            }, { passive: false })
+        }, 200)
+    </script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="slider active" style="background-color: antiquewhite;">1</div>
+        <div class="slider" style="background-color: cornflowerblue;" id="two">2</div>
+        <div class="slider" style="background-color: goldenrod;">3</div>
+        <div class="slider" style="background-color: darkcyan;">4</div>
+        <div class="slider" style="background-color: antiquewhite;">5</div>
+    </div>
+    <div class="h"></div>
+</body>
+
+</html>
