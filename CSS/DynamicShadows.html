@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
         :root {
-            --color-1:rgb(222, 255, 145);
-            --color-2:rgb(145, 255, 193);
-            --color-3:rgb(145, 207, 255);
-            --color-4:rgb(253, 145, 255);
-            --delta-x:0px;
-            --delta-y:0px;
+            --color-1: rgb(222, 255, 145);
+            --color-2: rgb(145, 255, 193);
+            --color-3: rgb(145, 207, 255);
+            --color-4: rgb(253, 145, 255);
+            --delta-x: 0px;
+            --delta-y: 0px;
         }
+
         .heigx {
             margin-top: 80vh;
             margin-bottom: 80vh;
@@ -20,12 +22,13 @@
             font-size: 80px;
             text-align: center;
         }
+
         .motive {
-            text-shadow: 
-                var(--delta-x) calc(var(--delta-y) / 4 * 4)  var(--color-1),
-                var(--delta-x) calc(var(--delta-y) / 4 * 3)  var(--color-2),
-                var(--delta-x) calc(var(--delta-y) / 4 * 2)  var(--color-3),
-                var(--delta-x) calc(var(--delta-y) / 4 * 1)  var(--color-4);
+            text-shadow:
+                var(--delta-x) calc(var(--delta-y) / 4 * 4) var(--color-1),
+                var(--delta-x) calc(var(--delta-y) / 4 * 3) var(--color-2),
+                var(--delta-x) calc(var(--delta-y) / 4 * 2) var(--color-3),
+                var(--delta-x) calc(var(--delta-y) / 4 * 1) var(--color-4);
         }
     </style>
     <script>
@@ -34,26 +37,29 @@
         let running = false
         const move = () => {
             let diff = targetPos - delayPos
-            console.log(running ? "自己调用" : "触发" ,diff)
+            console.log(running ? "自己调用" : "触发", diff)
             running = true
-            if(Math.abs(diff) > 1) {
+            if (Math.abs(diff) > 1) {
                 delayPos = delayPos + diff * 0.1
-                requestAnimationFrame(() => move(diff*0.9))
+                requestAnimationFrame(move)
             } else {
                 running = false
-                delayPos = diff
+                delayPos = targetPos
             }
-            document.documentElement.style.setProperty('--delta-y', `${diff / 2}px`);
+            const shown = Math.max(-200, Math.min(200, diff))
+            document.documentElement.style.setProperty('--delta-y', `${shown / 2}px`);
         }
-        window.addEventListener("scroll",()=>{
+        window.addEventListener("scroll", () => {
             targetPos = document.documentElement.scrollTop
-            if(!running) {
+            if (!running) {
                 move()
             }
         })
     </script>
 </head>
+
 <body>
     <div class="motive heigx">TEXT</div>
 </body>
+
 </html>
