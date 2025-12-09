@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { createProviderStore } from ".";
-import { create } from "zustand";
+import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { EventBus, readFile, parseAST } from "demo";
 
@@ -15,8 +15,8 @@ type Action = any;
 type Store = State & Action;
 
 const FileEditorStore = () =>
-  create(
-    immer<Store>((set, get) => ({
+  createStore<Store>()(
+    immer((set, get) => ({
       path: "",
       file: null,
       content: "",
