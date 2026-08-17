@@ -65,10 +65,10 @@
       <div class="hint-text" style="margin-top:4px">横排：左侧图标右侧文本，不限制文本长度</div>
     </div>
     <div class="actions">
-      <button class="btn danger" id="settingsDelete">删除</button>
+      <button class="btn danger" id="settingsDelete"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>删除</button>
       <span style="flex:1"></span>
-      <button class="btn cancel" id="settingsCancel">取消</button>
-      <button class="btn confirm" id="settingsSave">保存</button>
+      <button class="btn cancel" id="settingsCancel"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>取消</button>
+      <button class="btn confirm" id="settingsSave"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</button>
     </div>
   </div>
 </div>
@@ -108,10 +108,10 @@
       </div>
     </div>
     <div class="actions">
-      <button class="btn danger" id="textSettingsDelete">删除</button>
+      <button class="btn danger" id="textSettingsDelete"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>删除</button>
       <span style="flex:1"></span>
-      <button class="btn cancel" id="textSettingsCancel">取消</button>
-      <button class="btn confirm" id="textSettingsSave">保存</button>
+      <button class="btn cancel" id="textSettingsCancel"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>取消</button>
+      <button class="btn confirm" id="textSettingsSave"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</button>
     </div>
   </div>
 </div>
@@ -128,7 +128,7 @@
           <input type="number" id="gridInput" min="1" max="200" value="10">
         </div>
         <div class="hint-text">图标位置将吸附到此网格。值越小越精细，1 = 无吸附。</div>
-        <div class="prefs-actions"><button class="btn confirm" id="gridSave">保存网格</button></div>
+        <div class="prefs-actions"><button class="btn confirm" id="gridSave"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>保存网格</button></div>
       </div>
 
       <div class="prefs-section">
@@ -138,35 +138,35 @@
           <label class="tab"><input type="radio" name="defaultLayout" value="horizontal">横排（图标在左）</label>
         </div>
         <label class="checkbox-row"><input type="checkbox" id="layoutApplyAll"> 同时将所有现有图标切换为该布局</label>
-        <div class="prefs-actions"><button class="btn confirm" id="layoutSave">保存布局</button></div>
+        <div class="prefs-actions"><button class="btn confirm" id="layoutSave"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 12h18"/><path d="M12 3v18"/></svg>保存布局</button></div>
       </div>
 
       <div class="prefs-section">
         <h4>自定义 CSS</h4>
         <textarea id="cssInput" placeholder="body { background: #1a1a2e; }&#10;.icon { border-radius: 4px; }&#10;.icon .label { font-size: 11px; }" spellcheck="false"></textarea>
         <div class="hint-text">CSS 会自动包裹在 .desktop-root 作用域内，优先级高于默认样式。</div>
-        <div class="prefs-actions"><button class="btn confirm" id="cssSave">保存 CSS</button></div>
+        <div class="prefs-actions"><button class="btn confirm" id="cssSave"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>保存 CSS</button></div>
       </div>
 
       <div class="prefs-section">
         <h4>数据管理</h4>
         <div class="prefs-row">
           <span class="prefs-label">导出配置</span>
-          <button class="btn confirm" id="exportBtn">导出 JSON</button>
+          <button class="btn confirm" id="exportBtn"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>导出 JSON</button>
         </div>
         <div class="prefs-row">
           <span class="prefs-label">导入配置</span>
-          <button class="btn confirm" id="importBtn">导入 JSON</button>
+          <button class="btn confirm" id="importBtn"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>导入 JSON</button>
           <input type="file" id="importFile" accept="application/json" hidden>
         </div>
         <div class="prefs-row">
           <span class="prefs-label">清除 Service Worker 缓存</span>
-          <button class="btn danger" id="clearCacheBtn">清除并刷新</button>
+          <button class="btn danger" id="clearCacheBtn"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>清除并刷新</button>
         </div>
       </div>
     </div>
     <div class="actions">
-      <button class="btn cancel" id="prefsClose">关闭</button>
+      <button class="btn cancel" id="prefsClose"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>关闭</button>
     </div>
   </div>
 </div>
@@ -177,8 +177,12 @@
     <h3 id="confirmTitle">确认删除</h3>
     <p id="confirmText">确定要删除这个图标吗？</p>
     <div class="actions">
-      <button class="btn cancel" id="confirmCancel">取消</button>
-      <button class="btn danger" id="confirmOk">删除</button>
+      <button class="btn cancel" id="confirmCancel"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>取消</button>
+      <button class="btn danger" id="confirmOk">
+        <svg class="btn-icon" id="confirmOkIconDelete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+        <svg class="btn-icon" id="confirmOkIconImport" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+        <span id="confirmOkLabel">删除</span>
+      </button>
     </div>
   </div>
 </div>

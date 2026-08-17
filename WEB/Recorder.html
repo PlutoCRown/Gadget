@@ -18,7 +18,7 @@
   }
   * { box-sizing: border-box; scrollbar-width: none; }
   *::-webkit-scrollbar { width: 0; height: 0; }
-  html, body { height: 100%; }
+  html, body { height: 100%; overflow: hidden; }
   body {
     margin: 0;
     color: var(--text);
@@ -30,13 +30,17 @@
   button:disabled, input:disabled, select:disabled { opacity: .45; cursor: not-allowed; }
   .app {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-columns: minmax(0, 1fr) 352px;
     height: 100%;
+    min-height: 0;
+    overflow: hidden;
   }
   .stage {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     padding: 20px 20px 16px;
   }
   .top {
@@ -67,39 +71,19 @@
   .preview-wrap {
     position: relative;
     flex: 1;
-    min-height: 240px;
+    min-height: 0;
     background: #0b0d12;
     border: 1px solid var(--line);
     border-radius: 16px;
     overflow: hidden;
   }
   video {
-    display: block;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: contain;
     background: #0b0d12;
-  }
-  .empty {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: var(--muted);
-    pointer-events: none;
-  }
-  .empty strong { color: var(--text); font-size: 16px; }
-  .meta-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
   }
   .side {
     border-left: 1px solid var(--line);
@@ -138,7 +122,7 @@
   .btn-ok:hover:not(:disabled) { background: #34c07d; }
   .btn-block { width: 100%; }
   .i { width: 15px; height: 15px; flex-shrink: 0; }
-  .src-row { display: flex; gap: 8px; }
+  .src-row { display: flex; gap: 8px; margin-bottom: 8px; }
   .src-row #pickBtn { width: 100%; }
   .src-row #clearSrcBtn { display: none; flex: 1; }
   .has-src .src-row #pickBtn {
@@ -150,19 +134,19 @@
   }
   .has-src .src-row #pickBtn:hover:not(:disabled) { background: #363c4e; }
   .has-src .src-row #clearSrcBtn { display: inline-flex; }
-  #recRow { display: none; margin-top: 8px; }
+  #recRow { display: none; margin-bottom: 8px; }
   .has-src #recRow { display: flex; }
   #recRow .btn { flex: 1; }
   #pauseBtn .ico-play { display: none; }
   #pauseBtn.is-paused .ico-pause { display: none; }
   #pauseBtn.is-paused .ico-play { display: block; }
-  .hint, .warn, .err {
+  #srcHint {
+    display: none;
     margin-top: 8px;
     font-size: 12px;
-    color: var(--muted);
+    color: #e6c07b;
   }
-  .warn { color: #e6c07b; }
-  .err { color: #ff8b8b; }
+  #srcHint:not(:empty) { display: block; }
 
   .fold {
     margin-bottom: 10px;
@@ -307,12 +291,7 @@
     </div>
     <div class="preview-wrap">
       <video id="player" playsinline></video>
-      <div class="empty" id="emptyHint">
-        <strong>先选择要录的画面</strong>
-        <span>屏幕 / 窗口 / 标签页，选完再调编码并开始</span>
-      </div>
     </div>
-    <div class="meta-bar" id="metaBar"></div>
   </section>
 
   <aside class="side" id="side">
@@ -341,8 +320,7 @@
         <span>结束</span>
       </button>
     </div>
-    <p class="hint" id="srcHint">音频必须在系统选择框里勾选；选完后不能再补进系统声，只能重新选源。</p>
-    <p class="hint" id="recHint"></p>
+    <p id="srcHint"></p>
 
     <div id="editBlock">
       <h2 class="edit-title">截断 / 导出</h2>
@@ -376,7 +354,6 @@
         <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         <span>下载</span>
       </button>
-      <p class="hint">拖两端半边手柄截取区间，拖红线定位播放。下载时若有截取会按区间导出。</p>
     </div>
 
     <div class="fold open" id="foldRecord">
@@ -420,7 +397,6 @@
           <label><input type="checkbox" id="useDisplayAudio" checked>录制画面里的音频</label>
           <label><input type="checkbox" id="useMic">同时录制麦克风</label>
         </div>
-        <p class="hint">码率是给编码器的目标值。列表只出现 <code>isTypeSupported</code> 为真的格式。</p>
       </div>
     </div>
 
@@ -624,7 +600,6 @@
     $('pauseBtn').classList.toggle('is-paused', phase === 'paused');
     $('pauseLabel').textContent = phase === 'paused' ? '继续' : '暂停';
     $('stopBtn').disabled = !recording;
-    $('emptyHint').style.display = hasSrc || reviewing ? 'none' : 'flex';
   }
 
   function stopTracks(stream) {
@@ -644,28 +619,13 @@
     player.play().catch(() => {});
   }
 
+  function setWarn(msg) {
+    $('srcHint').textContent = msg || '';
+  }
+
   function updateMeta() {
-    const bits = [];
-    if (state.displayStream) {
-      const v = state.displayStream.getVideoTracks()[0];
-      const s = v && v.getSettings ? v.getSettings() : {};
-      if (s.width && s.height) bits.push(s.width + '×' + s.height);
-      if (s.frameRate) bits.push(Math.round(s.frameRate) + ' fps');
-      if (s.displaySurface) bits.push(s.displaySurface);
-      const hasA = state.displayStream.getAudioTracks().some((t) => t.readyState === 'live');
-      bits.push(hasA ? '含画面音频' : '无画面音频');
-    }
-    if (state.recorder) {
-      bits.push(state.recorder.mimeType || '默认编码');
-      if (state.recorder.videoBitsPerSecond) {
-        bits.push(Math.round(state.recorder.videoBitsPerSecond / 1000) + ' kbps');
-      }
-    }
-    if (state.phase === 'recording' || state.phase === 'paused') {
-      bits.push(fmtTime(elapsedSec()));
-    }
-    if (state.blob) bits.push((state.blob.size / 1024 / 1024).toFixed(2) + ' MB');
-    $('metaBar').textContent = bits.join('  ·  ');
+    if (state.phase === 'recording') setChip('录制中 ' + fmtTime(elapsedSec()), 'rec');
+    else if (state.phase === 'paused') setChip('已暂停 ' + fmtTime(elapsedSec()));
   }
 
   function elapsedSec() {
@@ -695,8 +655,7 @@
 
   async function pickSource() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-      $('srcHint').className = 'err';
-      $('srcHint').textContent = '当前环境没有 getDisplayMedia（需要 HTTPS 或 localhost）。';
+      setWarn('当前环境没有 getDisplayMedia（需要 HTTPS 或 localhost）');
       return;
     }
     const video = { cursor: $('cursor').value };
@@ -721,11 +680,7 @@
       showLive();
       setChip('已选画面', 'live');
       setPhase('ready');
-      const hasA = stream.getAudioTracks().length > 0;
-      $('srcHint').className = hasA ? 'hint' : 'warn';
-      $('srcHint').textContent = hasA
-        ? '已拿到画面音频轨。开始录制前仍可改编码、码率和麦克风。'
-        : '这次没有画面音频。若要系统声，请重新选择并在浏览器对话框里勾选音频。';
+      setWarn(stream.getAudioTracks().length ? '' : '这次没有画面音频。若要系统声，请重新选择并在浏览器对话框里勾选音频。');
       updateMeta();
     } catch (err) {
       if (err && err.name === 'NotAllowedError') toast('已取消选择');
@@ -749,6 +704,7 @@
       player.srcObject = null;
       player.removeAttribute('src');
       setChip('未选择画面');
+      setWarn('');
       setPhase('idle');
       updateMeta();
     } else {
@@ -825,8 +781,6 @@
       state.pausedMs = 0;
       setPhase('recording');
       setChip('录制中', 'rec');
-      $('recHint').textContent = '实际编码：' + (recorder.mimeType || '浏览器默认') +
-        (recorder.videoBitsPerSecond ? ' · ' + Math.round(recorder.videoBitsPerSecond / 1000) + ' kbps' : '');
       state.timerId = setInterval(updateMeta, 250);
       updateMeta();
     } catch (err) {
@@ -899,12 +853,9 @@
     state.trimIn = 0;
     state.trimOut = state.duration;
     setPhase('review');
-    setChip('在线视频录制');
+    setChip('可截断 / 下载');
     drawTrim();
     updateMeta();
-    $('recHint').textContent = state.displayStream && state.displayStream.getVideoTracks()[0].readyState === 'live'
-      ? '画面共享仍在。可截断下载，或再点「录制」。'
-      : '共享已结束。可截断或下载；再录需要重新选择画面。';
   }
 
   function fileName() {
@@ -1123,11 +1074,9 @@
   setPhase('idle');
 
   if (!window.isSecureContext) {
-    $('srcHint').className = 'err';
-    $('srcHint').textContent = 'getDisplayMedia 只能在 HTTPS 或 localhost 使用。';
+    setWarn('getDisplayMedia 只能在 HTTPS 或 localhost 使用。');
   } else if (!window.MediaRecorder) {
-    $('recHint').className = 'err';
-    $('recHint').textContent = '当前浏览器没有 MediaRecorder。';
+    setWarn('当前浏览器没有 MediaRecorder。');
   }
 })();
 </script>

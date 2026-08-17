@@ -36,6 +36,12 @@ document.addEventListener('dragleave',function(e){
 });
 document.addEventListener('drop',function(e){
   e.preventDefault();document.body.classList.remove('drag-over');
+  var files=e.dataTransfer.files;
+  if(files&&files.length){
+    var file=files[0];
+    if(file.type==='application/json'||/\.json$/i.test(file.name))D.tryImportFile(file);
+    return;
+  }
   var url=e.dataTransfer.getData('text/uri-list')||e.dataTransfer.getData('text/plain');
   var title=e.dataTransfer.getData('text');if(!url)return;
   try{new URL(url)}catch(e2){return}

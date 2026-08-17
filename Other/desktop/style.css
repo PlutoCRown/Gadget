@@ -212,7 +212,12 @@ body.drag-over::before{
 .modal .field input:focus{border-color:var(--color-primary-border)}
 .modal .field .hint-text{font-size:var(--font-size-xs);color:var(--color-text-quaternary);margin-top:4px}
 .modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
-.modal .btn{padding:8px 18px;font-size:var(--font-size);border-radius:var(--border-radius);cursor:pointer;border:1px solid transparent}
+.modal .btn{
+  padding:7px 14px;font-size:var(--font-size);border-radius:var(--border-radius-xs);
+  cursor:pointer;border:1px solid transparent;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.modal .btn .btn-icon{width:14px;height:14px;flex-shrink:0;opacity:.9}
 .modal .btn.cancel{background:transparent;border-color:var(--color-border-strong);color:var(--color-text-secondary)}
 .modal .btn.cancel:hover{background:var(--color-fill)}
 .modal .btn.confirm{background:var(--color-primary);color:var(--color-text-inverse)}

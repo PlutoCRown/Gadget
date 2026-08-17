@@ -44,9 +44,13 @@ document.addEventListener('click',function(e){if(!e.target.closest('.ctx-menu'))
 var confirmMask=document.getElementById('confirmMask');
 var confirmAction=null;
 
-D.showConfirm=function(title,text,action){
+D.showConfirm=function(title,text,action,okLabel){
   document.getElementById('confirmTitle').textContent=title;
   document.getElementById('confirmText').textContent=text;
+  document.getElementById('confirmOkLabel').textContent=okLabel||'删除';
+  var isImport=okLabel==='导入';
+  document.getElementById('confirmOkIconDelete').style.display=isImport?'none':'';
+  document.getElementById('confirmOkIconImport').style.display=isImport?'':'none';
   confirmAction=action;confirmMask.classList.add('show');
 };
 
@@ -127,41 +131,61 @@ document.getElementById('cssSave').addEventListener('click',function(){
   toast('CSS 已保存');
 });
 
+D.isConfigData=function(data){
+  return data&&typeof data==='object'&&Array.isArray(data.icons);
+};
+
+D.applyImportedConfig=async function(data){
+  localStorage.setItem('desktop_icons_v2',JSON.stringify(data.icons));
+  if(data.grid){localStorage.setItem('desktop_grid',String(data.grid));D.grid=parseInt(data.grid)||D.grid}
+  if(data.defaultLayout){localStorage.setItem('desktop_default_layout',data.defaultLayout);D.defaultLayout=data.defaultLayout}
+  if(typeof data.snapEnabled==='boolean'){D.snapEnabled=data.snapEnabled;D.saveSnap();D.updateGridLabel()}
+  if(data.images){
+    var keys=Object.keys(data.images);
+    for(var i=0;i<keys.length;i++)await D.idbPut(keys[i],data.images[keys[i]]);
+  }
+  D.load();
+  document.querySelectorAll('.icon').forEach(function(el){el.remove()});
+  D.renderAll();
+  if(Array.isArray(data.texts)){
+    D.texts=data.texts;
+    D.saveTexts();
+    D.renderAllTexts();
+  }
+  D.closePrefs();
+  var msg='导入成功！共 '+data.icons.length+' 个图标';
+  if(Array.isArray(data.texts))msg+='、'+data.texts.length+' 个文本';
+  toast(msg);
+};
+
+D.promptImport=function(data){
+  if(!D.isConfigData(data)){toast('无效的配置文件');return}
+  var n=data.icons.length;
+  var t=Array.isArray(data.texts)?data.texts.length:0;
+  var detail='本次将导入 '+n+' 个图标'+(t?'、'+t+' 个文本':'')+'。';
+  D.showConfirm('导入配置','导入将覆盖当前桌面上的全部图标和文本。'+detail+'确定继续吗？',function(){
+    D.applyImportedConfig(data);
+  },'导入');
+};
+
+D.tryImportFile=function(file){
+  file.text().then(function(text){
+    var data=JSON.parse(text);
+    D.promptImport(data);
+  }).catch(function(err){
+    toast('导入失败：'+(err&&err.message?err.message:'文件格式错误'));
+  });
+};
+
 document.getElementById('exportBtn').addEventListener('click',function(){D.exportConfig()});
 
 document.getElementById('importBtn').addEventListener('click',function(){
   document.getElementById('importFile').click();
 });
-document.getElementById('importFile').addEventListener('change',async function(e){
-  var file=e.target.files[0];if(!file)return;
-  try{
-    var text=await file.text();
-    var data=JSON.parse(text);
-    if(!data.icons){toast('无效的配置文件');return}
-    localStorage.setItem('desktop_icons_v2',JSON.stringify(data.icons));
-    if(data.grid){localStorage.setItem('desktop_grid',String(data.grid));D.grid=parseInt(data.grid)||D.grid}
-    if(data.defaultLayout){localStorage.setItem('desktop_default_layout',data.defaultLayout);D.defaultLayout=data.defaultLayout}
-    if(typeof data.snapEnabled==='boolean'){D.snapEnabled=data.snapEnabled;D.saveSnap();D.updateGridLabel()}
-    if(data.images){
-      var keys=Object.keys(data.images);
-      for(var i=0;i<keys.length;i++)await D.idbPut(keys[i],data.images[keys[i]]);
-    }
-    D.load();
-    document.querySelectorAll('.icon').forEach(function(el){el.remove()});
-    D.renderAll();
-    if(Array.isArray(data.texts)){
-      D.texts=data.texts;
-      D.saveTexts();
-      D.renderAllTexts();
-    }
-    D.closePrefs();
-    var msg='导入成功！共 '+data.icons.length+' 个图标';
-    if(Array.isArray(data.texts))msg+='、'+data.texts.length+' 个文本';
-    toast(msg);
-  }catch(err){
-    toast('导入失败：'+err.message);
-  }
+document.getElementById('importFile').addEventListener('change',function(e){
+  var file=e.target.files[0];
   e.target.value='';
+  if(file)D.tryImportFile(file);
 });
 
 document.getElementById('clearCacheBtn').addEventListener('click',async function(){
