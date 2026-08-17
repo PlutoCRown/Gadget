@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script>if(!location.pathname.endsWith('/'))location.replace(location.pathname+'/')</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>桌面</title>
+<link rel="icon" href="assets/default-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="hint" id="hint">将链接拖放到此处创建桌面图标 · 空白处拖动框选 · 右键更多操作</div>
+
+<!-- 框选 -->
+<div class="select-box" id="selectBox"></div>
+
+<!-- 多选右键菜单 -->
+<div class="ctx-menu" id="multiMenu">
+  <div class="item" data-action="open-all"><span class="item-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>全部打开</span></div>
+  <div class="sep"></div>
+  <div class="item danger" data-action="delete-all"><span class="item-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>批量删除</span><span class="shortcut" id="multiCount"></span></div>
+</div>
+
+<!-- 桌面右键菜单 -->
+<div class="ctx-menu" id="deskMenu">
+  <div class="item" data-action="create-text"><span class="item-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>创建文本</span></div>
+  <div class="sep"></div>
+  <div class="item" data-action="snap-toggle" id="snapToggle"><span class="item-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 10-7-7-7 7"/><path d="M12 3v15"/><path d="M5 21h14"/></svg>对齐网格</span><span class="shortcut">开</span></div>
+  <div class="sep"></div>
+  <div class="item" data-action="save"><span class="item-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</span></div>
+  <div class="item" data-action="settings-page"><span class="item-label"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>设置</span></div>
+</div>
+
+<!-- 图标设置弹窗 -->
+<div class="modal-mask" id="settingsMask">
+  <div class="modal modal-wide">
+    <h3>图标设置</h3>
+    <div class="settings-row">
+      <div class="icon-preview-wrap">
+        <div class="icon-preview" id="iconPreview"></div>
+        <div class="icon-preview-hint" id="iconPreviewHint">点击上传</div>
+      </div>
+      <input type="file" id="iconFile" accept="image/*" hidden>
+      <div class="settings-right">
+        <input type="text" id="iconText" placeholder="输入 emoji 或字母（留空自动获取）" maxlength="4">
+        <div class="color-swatches" id="colorSwatches">
+          <span class="swatch" data-color="linear-gradient(135deg,#5a9fd4,#4285F4)" style="background:linear-gradient(135deg,#5a9fd4,#4285F4)"></span>
+          <span class="swatch" data-color="linear-gradient(135deg,#34d399,#10b981)" style="background:linear-gradient(135deg,#34d399,#10b981)"></span>
+          <span class="swatch" data-color="linear-gradient(135deg,#a78bfa,#7c3aed)" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)"></span>
+          <span class="swatch" data-color="linear-gradient(135deg,#fbbf24,#f59e0b)" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)"></span>
+          <span class="swatch" data-color="linear-gradient(135deg,#f472b6,#ec4899)" style="background:linear-gradient(135deg,#f472b6,#ec4899)"></span>
+          <span class="swatch" data-color="linear-gradient(135deg,#f87171,#ef4444)" style="background:linear-gradient(135deg,#f87171,#ef4444)"></span>
+          <label class="swatch swatch-custom" title="自定义颜色">
+            <input type="color" id="iconColor" value="#4285F4">
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>名称</label><input type="text" id="settingsName" placeholder="显示名称"></div>
+    <div class="field"><label>链接地址</label><input type="text" id="settingsUrl" placeholder="https://..."></div>
+    <div class="field">
+      <label>布局</label>
+      <div class="layout-tabs">
+        <label class="tab"><input type="radio" name="iconLayout" value="vertical" checked>竖排</label>
+        <label class="tab"><input type="radio" name="iconLayout" value="horizontal">横排</label>
+      </div>
+      <div class="hint-text" style="margin-top:4px">横排：左侧图标右侧文本，不限制文本长度</div>
+    </div>
+    <div class="actions">
+      <button class="btn danger" id="settingsDelete">删除</button>
+      <span style="flex:1"></span>
+      <button class="btn cancel" id="settingsCancel">取消</button>
+      <button class="btn confirm" id="settingsSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 桌面设置弹窗 -->
+<div class="modal-mask" id="prefsMask">
+  <div class="modal modal-prefs">
+    <h3>设置</h3>
+    <div class="prefs-body">
+      <div class="prefs-section">
+        <h4>网格设置</h4>
+        <div class="prefs-row">
+          <span class="prefs-label">网格大小（像素）</span>
+          <input type="number" id="gridInput" min="1" max="200" value="10">
+        </div>
+        <div class="hint-text">图标位置将吸附到此网格。值越小越精细，1 = 无吸附。</div>
+        <div class="prefs-actions"><button class="btn confirm" id="gridSave">保存网格</button></div>
+      </div>
+
+      <div class="prefs-section">
+        <h4>默认图标布局</h4>
+        <div class="layout-tabs" id="defaultLayoutTabs">
+          <label class="tab"><input type="radio" name="defaultLayout" value="vertical">竖排（图标在上）</label>
+          <label class="tab"><input type="radio" name="defaultLayout" value="horizontal">横排（图标在左）</label>
+        </div>
+        <label class="checkbox-row"><input type="checkbox" id="layoutApplyAll"> 同时将所有现有图标切换为该布局</label>
+        <div class="prefs-actions"><button class="btn confirm" id="layoutSave">保存布局</button></div>
+      </div>
+
+      <div class="prefs-section">
+        <h4>自定义 CSS</h4>
+        <textarea id="cssInput" placeholder="body { background: #1a1a2e; }&#10;.icon { border-radius: 4px; }&#10;.icon .label { font-size: 11px; }" spellcheck="false"></textarea>
+        <div class="hint-text">CSS 会自动包裹在 .desktop-root 作用域内，优先级高于默认样式。</div>
+        <div class="prefs-actions"><button class="btn confirm" id="cssSave">保存 CSS</button></div>
+      </div>
+
+      <div class="prefs-section">
+        <h4>数据管理</h4>
+        <div class="prefs-row">
+          <span class="prefs-label">导出配置</span>
+          <button class="btn confirm" id="exportBtn">导出 JSON</button>
+        </div>
+        <div class="prefs-row">
+          <span class="prefs-label">导入配置</span>
+          <button class="btn confirm" id="importBtn">导入 JSON</button>
+          <input type="file" id="importFile" accept="application/json" hidden>
+        </div>
+        <div class="prefs-row">
+          <span class="prefs-label">清除 Service Worker 缓存</span>
+          <button class="btn danger" id="clearCacheBtn">清除并刷新</button>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn cancel" id="prefsClose">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="modal-mask" id="confirmMask">
+  <div class="modal">
+    <h3 id="confirmTitle">确认删除</h3>
+    <p id="confirmText">确定要删除这个图标吗？</p>
+    <div class="actions">
+      <button class="btn cancel" id="confirmCancel">取消</button>
+      <button class="btn danger" id="confirmOk">删除</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/store.js"></script>
+<script src="js/render.js"></script>
+<script src="js/interaction.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/texts.js"></script>
+<script src="js/menus.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/init.js"></script>
+</body>
+</html>
