@@ -14,7 +14,7 @@ D.findText=function(id){return D.texts.filter(function(t){return t.id===id})[0]}
 D.addText=function(x,y){
   x=D.snap(Math.max(4,Math.min(window.innerWidth-100,x)));
   y=D.snap(Math.max(4,Math.min(window.innerHeight-50,y)));
-  var t={id:'txt_'+Date.now()+'_'+(++D.idc),text:'默认文本',x:x,y:y,color:DEFAULT_TEXT_COLOR,opacity:DEFAULT_TEXT_OPACITY,fontSize:DEFAULT_TEXT_SIZE};
+  var t={id:'txt_'+Date.now()+'_'+(++D.idc),text:'默认文本',x:x,y:y,color:D.resolveTheme()==='light'?'#333333':'#cccccc',opacity:DEFAULT_TEXT_OPACITY,fontSize:DEFAULT_TEXT_SIZE};
   D.texts.push(t);
   var el=D.createTextEl(t);
   document.body.appendChild(el);

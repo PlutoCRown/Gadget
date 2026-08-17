@@ -1,4 +1,4 @@
-var CACHE_NAME = 'desktop-homepage-v9';
+var CACHE_NAME = 'desktop-homepage-v10';
 var CACHE_FILES = [
   './',
   './index.html',

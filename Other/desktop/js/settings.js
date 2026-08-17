@@ -57,7 +57,7 @@ function renderPreview(){
     D.defaultFavicon(sUrl.value.trim()).then(function(url){
       if(currentType()!=='favicon'||customIconUrl()||!url)return;
       sPrev.innerHTML='';
-      var img2=document.createElement('img');img2.src=url;img2.alt='';
+      var img2=document.createElement('img');img2.src=url;img2.alt='';img2.referrerPolicy='no-referrer';
       img2.onerror=function(){sPrev.innerHTML='';var fb3=document.createElement('div');fb3.className='fallback';fb3.textContent=label;sPrev.appendChild(fb3)};
       sPrev.appendChild(img2);
     });
@@ -128,7 +128,7 @@ function renderFaviconPreview(iconUrl){
   sPrev.innerHTML='';
   var fb=document.createElement('div');fb.className='fallback';fb.textContent=label;sPrev.appendChild(fb);
   sHint.textContent='点击更换';
-  var img=document.createElement('img');img.src=iconUrl;img.alt='';
+  var img=document.createElement('img');img.src=iconUrl;img.alt='';img.referrerPolicy='no-referrer';
   img.onload=function(){sPrev.innerHTML='';sPrev.appendChild(img)};
   img.onerror=function(){};
 }

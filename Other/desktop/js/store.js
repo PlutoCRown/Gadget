@@ -2,7 +2,7 @@ var D = window.D || {};
 
 /* ---------- 存储键 ---------- */
 var ICON_KEY='desktop_icons_v2',GRID_KEY='desktop_grid',SNAP_KEY='desktop_snap';
-var CSS_KEY='desktop_custom_css',LAYOUT_KEY='desktop_default_layout';
+var CSS_KEY='desktop_custom_css',LAYOUT_KEY='desktop_default_layout',THEME_KEY='desktop_theme';
 var DEFAULT_GRID=10;
 
 /* ---------- 全局状态 ---------- */
@@ -10,6 +10,7 @@ D.icons=[];
 D.grid=parseInt(localStorage.getItem(GRID_KEY))||DEFAULT_GRID;
 D.snapEnabled=localStorage.getItem(SNAP_KEY)!=='0';
 D.defaultLayout=localStorage.getItem(LAYOUT_KEY)||'vertical';
+D.themeMode=localStorage.getItem(THEME_KEY)||'system';
 D.idc=0;
 D.selecting=false;
 
@@ -21,6 +22,22 @@ D.saveIcons=function(){localStorage.setItem(ICON_KEY,JSON.stringify(D.icons))};
 D.saveGrid=function(){localStorage.setItem(GRID_KEY,String(D.grid))};
 D.saveSnap=function(){localStorage.setItem(SNAP_KEY,D.snapEnabled?'1':'0')};
 D.saveDefaultLayout=function(){localStorage.setItem(LAYOUT_KEY,D.defaultLayout)};
+D.saveTheme=function(){localStorage.setItem(THEME_KEY,D.themeMode)};
+
+D.detectPreferredTheme=function(){
+  try{
+    var mq=window.matchMedia('(prefers-color-scheme: dark)');
+    if(mq&&mq.media!=='not all')return mq.matches?'dark':'light';
+  }catch(e){}
+  return 'dark';
+};
+D.resolveTheme=function(){
+  if(D.themeMode==='light'||D.themeMode==='dark')return D.themeMode;
+  return D.detectPreferredTheme();
+};
+D.applyTheme=function(){
+  document.documentElement.setAttribute('data-theme',D.resolveTheme());
+};
 
 /* ---------- 自定义 CSS ---------- */
 D.loadCustomCSS=function(){return localStorage.getItem(CSS_KEY)||''};

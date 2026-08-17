@@ -34,7 +34,7 @@ document.getElementById('deskMenu').addEventListener('click',function(e){
   var act=item.dataset.action;D.hideMenus();
   if(act==='create-text')D.addText(D.mouseX,D.mouseY);
   else if(act==='snap-toggle'){D.snapEnabled=!D.snapEnabled;D.saveSnap();D.updateGridLabel();D.resnapAll()}
-  else if(act==='save'){D.saveIcons();D.saveGrid();D.saveSnap();D.saveDefaultLayout();D.saveTexts();D.saveCustomCSS(D.loadCustomCSS());toast('已保存')}
+  else if(act==='save'){D.saveIcons();D.saveGrid();D.saveSnap();D.saveDefaultLayout();D.saveTheme();D.saveTexts();D.saveCustomCSS(D.loadCustomCSS());toast('已保存')}
   else if(act==='settings-page')D.openPrefs();
 });
 
@@ -82,11 +82,20 @@ function syncDefaultLayoutTabs(){
   });
 }
 
+function syncThemeTabs(){
+  document.querySelectorAll('#themeTabs .tab').forEach(function(tab){
+    tab.classList.toggle('active',tab.querySelector('input').checked);
+  });
+}
+
 D.openPrefs=function(){
   document.getElementById('gridInput').value=D.grid;
   var r=document.querySelector('input[name=defaultLayout][value="'+D.defaultLayout+'"]');
   if(r)r.checked=true;
   syncDefaultLayoutTabs();
+  var tr=document.querySelector('input[name=themeMode][value="'+D.themeMode+'"]');
+  if(tr)tr.checked=true;
+  syncThemeTabs();
   document.getElementById('layoutApplyAll').checked=false;
   document.getElementById('cssInput').value=D.loadCustomCSS();
   prefsMask.classList.add('show');
@@ -99,6 +108,15 @@ prefsMask.addEventListener('click',function(e){if(e.target===prefsMask)D.closePr
 
 document.querySelectorAll('input[name=defaultLayout]').forEach(function(r){
   r.addEventListener('change',syncDefaultLayoutTabs);
+});
+
+document.querySelectorAll('input[name=themeMode]').forEach(function(r){
+  r.addEventListener('change',function(){
+    D.themeMode=this.value;
+    D.saveTheme();
+    D.applyTheme();
+    syncThemeTabs();
+  });
 });
 
 document.getElementById('gridSave').addEventListener('click',function(){
@@ -139,6 +157,7 @@ D.applyImportedConfig=async function(data){
   localStorage.setItem('desktop_icons_v2',JSON.stringify(data.icons));
   if(data.grid){localStorage.setItem('desktop_grid',String(data.grid));D.grid=parseInt(data.grid)||D.grid}
   if(data.defaultLayout){localStorage.setItem('desktop_default_layout',data.defaultLayout);D.defaultLayout=data.defaultLayout}
+  if(data.themeMode){D.themeMode=data.themeMode;D.saveTheme();D.applyTheme()}
   if(typeof data.snapEnabled==='boolean'){D.snapEnabled=data.snapEnabled;D.saveSnap();D.updateGridLabel()}
   if(data.images){
     var keys=Object.keys(data.images);

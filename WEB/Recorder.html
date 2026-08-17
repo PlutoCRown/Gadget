@@ -6,11 +6,17 @@
 <title>录屏</title>
 <style>
   :root {
-    --bg: #12141a;
-    --panel: #1b1e27;
-    --line: #2a2e3a;
-    --text: #e8eaed;
-    --muted: #8b909a;
+    --bg: #121212;
+    --panel: #1c1c1c;
+    --line: #2e2e2e;
+    --text: #e8e8e8;
+    --muted: #909090;
+    --preview: #0b0b0b;
+    --chip: #252525;
+    --btn: #2e2e2e;
+    --btn-hover: #3a3a3a;
+    --fold: #161616;
+    --rail: #323232;
     --rec: #e23c3c;
     --ok: #3dd68c;
     --focus: #6ea8ff;
@@ -56,7 +62,7 @@
     gap: 6px;
     padding: 4px 10px;
     border-radius: 999px;
-    background: #252833;
+    background: var(--chip);
     color: var(--muted);
     font-size: 12px;
   }
@@ -72,7 +78,7 @@
     position: relative;
     flex: 1;
     min-height: 0;
-    background: #0b0d12;
+    background: var(--preview);
     border: 1px solid var(--line);
     border-radius: 16px;
     overflow: hidden;
@@ -83,7 +89,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    background: #0b0d12;
+    background: var(--preview);
   }
   .side {
     border-left: 1px solid var(--line);
@@ -96,7 +102,7 @@
   input[type=text], input[type=number], select {
     width: 100%;
     border: 1px solid var(--line);
-    background: #12141a;
+    background: var(--bg);
     border-radius: 8px;
     padding: 8px 10px;
     outline: none;
@@ -113,9 +119,9 @@
     border: 0;
     border-radius: 8px;
     padding: 8px 12px;
-    background: #2c3140;
+    background: var(--btn);
   }
-  .btn:hover:not(:disabled) { background: #363c4e; }
+  .btn:hover:not(:disabled) { background: var(--btn-hover); }
   .btn-danger { background: var(--rec); color: #fff; font-weight: 650; }
   .btn-danger:hover:not(:disabled) { background: #c83333; }
   .btn-ok { background: var(--ok); color: #082014; font-weight: 650; }
@@ -128,11 +134,11 @@
   .has-src .src-row #pickBtn {
     width: auto;
     flex: 1;
-    background: #2c3140;
+    background: var(--btn);
     color: var(--text);
     font-weight: 500;
   }
-  .has-src .src-row #pickBtn:hover:not(:disabled) { background: #363c4e; }
+  .has-src .src-row #pickBtn:hover:not(:disabled) { background: var(--btn-hover); }
   .has-src .src-row #clearSrcBtn { display: inline-flex; }
   #recRow { display: none; margin-bottom: 8px; }
   .has-src #recRow { display: flex; }
@@ -152,9 +158,9 @@
     margin-bottom: 10px;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: #161922;
+    background: var(--fold);
     overflow: clip;
-    transition: height .4s ease;
+    transition: height .2s ease;
     height: 40px;
   }
   .fold.open { height: auto; }
@@ -174,7 +180,7 @@
   .fold-head:hover { background: transparent; }
   .fold .chevron {
     margin-left: auto;
-    transition: transform .35s ease;
+    transition: transform .2s ease;
   }
   .fold.open .chevron { transform: rotate(180deg); }
   .fold-body { padding: 4px 12px 12px; }
@@ -201,7 +207,7 @@
     left: 0; right: 0; top: 16px;
     height: 6px;
     border-radius: 99px;
-    background: #2f3442;
+    background: var(--rail);
   }
   .range {
     position: absolute;
@@ -268,7 +274,7 @@
     transform: translateX(-50%);
     padding: 8px 14px;
     border-radius: 8px;
-    background: #2a2e3a;
+    background: var(--line);
     color: var(--text);
     opacity: 0;
     pointer-events: none;

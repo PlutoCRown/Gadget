@@ -3,6 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <script>if(!location.pathname.endsWith('/'))location.replace(location.pathname+'/')</script>
+<script>
+(function(){
+  var mode='system';
+  try{mode=localStorage.getItem('desktop_theme')||'system'}catch(e){}
+  var dark=true;
+  try{
+    if(mode==='light')dark=false;
+    else if(mode==='dark')dark=true;
+    else{
+      var mq=window.matchMedia('(prefers-color-scheme: dark)');
+      dark=mq.media==='not all'?true:mq.matches;
+    }
+  }catch(e){}
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>桌面</title>
 <link rel="icon" href="assets/default-icon.svg" type="image/svg+xml">
@@ -121,6 +137,16 @@
   <div class="modal modal-prefs">
     <h3>设置</h3>
     <div class="prefs-body">
+      <div class="prefs-section">
+        <h4>外观</h4>
+        <div class="layout-tabs" id="themeTabs">
+          <label class="tab"><input type="radio" name="themeMode" value="system" checked>自动</label>
+          <label class="tab"><input type="radio" name="themeMode" value="light">浅色</label>
+          <label class="tab"><input type="radio" name="themeMode" value="dark">深色</label>
+        </div>
+        <div class="hint-text">自动：跟随 Chrome 的浅色/深色；读不到时跟随系统。</div>
+      </div>
+
       <div class="prefs-section">
         <h4>网格设置</h4>
         <div class="prefs-row">

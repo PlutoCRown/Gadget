@@ -37,14 +37,14 @@ D.updateIconEl=function(el,ic){
     });
   }else{
     if(ic.iconUrl){
-      var img=document.createElement('img');img.src=ic.iconUrl;img.alt='';
+      var img=document.createElement('img');img.src=ic.iconUrl;img.alt='';img.referrerPolicy='no-referrer';
       img.onerror=function(){fav.innerHTML='';var fb=document.createElement('div');fb.className='fallback';fb.textContent=D.letterOf(ic.title||D.hostname(ic.url));fav.appendChild(fb)};
       fav.appendChild(img);
     }else{
       var fb0=document.createElement('div');fb0.className='fallback';fb0.textContent=D.letterOf(ic.title||D.hostname(ic.url));fav.appendChild(fb0);
       D.defaultFavicon(ic.url).then(function(iconUrl){
         if(el._token!==token||!iconUrl)return;
-        var img=document.createElement('img');img.src=iconUrl;img.alt='';
+        var img=document.createElement('img');img.src=iconUrl;img.alt='';img.referrerPolicy='no-referrer';
         img.onerror=function(){};
         fav.innerHTML='';fav.appendChild(img);
       });

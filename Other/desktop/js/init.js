@@ -62,8 +62,16 @@ document.addEventListener('paste',function(e){
 
 /* ---------- 初始化 ---------- */
 document.body.classList.add('desktop-root');
+D.applyTheme();
 D.applyCustomCSS();
 D.idbOpen().then(function(){D.load();D.renderAll();D.loadTexts();D.renderAllTexts()});
+
+try{
+  var themeMq=window.matchMedia('(prefers-color-scheme: dark)');
+  var onScheme=function(){if(D.themeMode==='system')D.applyTheme()};
+  if(themeMq.addEventListener)themeMq.addEventListener('change',onScheme);
+  else if(themeMq.addListener)themeMq.addListener(onScheme);
+}catch(e){}
 
 /* ---------- Service Worker ---------- */
 if('serviceWorker' in navigator){

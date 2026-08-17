@@ -43,6 +43,7 @@ D.exportConfig=function(){
       grid:D.grid,
       snapEnabled:D.snapEnabled,
       defaultLayout:D.defaultLayout,
+      themeMode:D.themeMode,
       icons:D.icons.map(clone),
       texts:D.texts.map(clone),
       images:images
