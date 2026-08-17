@@ -1,168 +1,1135 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script>
-        function record() {
-            navigator.mediaDevices.getDisplayMedia()
-                .then(mediaStream => {
-                    const options = { mimeType: 'video/webm; codecs=vp9', };
-                    const mediaRecorder = new MediaRecorder(mediaStream, options);
-                    let chunks = [];
-                    console.log(mediaRecorder)
-                    mediaRecorder.addEventListener('dataavailable', event => {
-                        if (event.data.size > 0) {
-                            chunks.push(event.data);
-                        }
-                    });
-                    mediaRecorder.addEventListener('stop', () => {
-                        const blob = new Blob(chunks, { type: 'video/webm' });
-                        const url = URL.createObjectURL(blob);
-                        document.querySelector(".page-transcodecs video").src = url
-                        // const a = document.createElement('a');
-                        // a.href = url;
-                        // a.download = 'screen-record.webm';
-                        // document.body.appendChild(a);
-                        // a.click();
-                        // URL.revokeObjectURL(url);
-                    });
-                    mediaRecorder.start();
-                    setTimeout(() => {
-                        // 停止录制
-                        mediaRecorder.stop();
-                    }, 10000); // 录制10秒钟
-                })
-                .catch(error => {
-                    console.error('getUserMedia error:', error);
-                });
-        }
-    </script>
-    <style>
-        body {
-            margin: 0;
-            height: 100%;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>录屏</title>
+<style>
+  :root {
+    --bg: #12141a;
+    --panel: #1b1e27;
+    --line: #2a2e3a;
+    --text: #e8eaed;
+    --muted: #8b909a;
+    --rec: #e23c3c;
+    --ok: #3dd68c;
+    --focus: #6ea8ff;
+    interpolate-size: allow-keywords;
+  }
+  * { box-sizing: border-box; scrollbar-width: none; }
+  *::-webkit-scrollbar { width: 0; height: 0; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    color: var(--text);
+    background: var(--bg);
+    font: 14px/1.45 ui-sans-serif, system-ui, sans-serif;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled, input:disabled, select:disabled { opacity: .45; cursor: not-allowed; }
+  .app {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    height: 100%;
+  }
+  .stage {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 20px 20px 16px;
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  h1 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: .02em; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #252833;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .chip.live::before, .chip.rec::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+  }
+  .chip.rec { color: #ffd0d0; background: #3a1e22; }
+  .chip.rec::before { background: var(--rec); box-shadow: 0 0 0 3px rgba(226,60,60,.25); }
+  .preview-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 240px;
+    background: #0b0d12;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #0b0d12;
+  }
+  .empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .empty strong { color: var(--text); font-size: 16px; }
+  .meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .side {
+    border-left: 1px solid var(--line);
+    background: var(--panel);
+    padding: 16px;
+    overflow: auto;
+  }
+  .row { margin-bottom: 10px; }
+  label.field { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+  input[type=text], input[type=number], select {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: #12141a;
+    border-radius: 8px;
+    padding: 8px 10px;
+    outline: none;
+  }
+  input:focus, select:focus { border-color: var(--focus); }
+  .checks { display: flex; flex-direction: column; gap: 6px; }
+  .checks label { display: flex; align-items: center; gap: 8px; color: var(--text); }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: #2c3140;
+  }
+  .btn:hover:not(:disabled) { background: #363c4e; }
+  .btn-danger { background: var(--rec); color: #fff; font-weight: 650; }
+  .btn-danger:hover:not(:disabled) { background: #c83333; }
+  .btn-ok { background: var(--ok); color: #082014; font-weight: 650; }
+  .btn-ok:hover:not(:disabled) { background: #34c07d; }
+  .btn-block { width: 100%; }
+  .i { width: 15px; height: 15px; flex-shrink: 0; }
+  .src-row { display: flex; gap: 8px; }
+  .src-row #pickBtn { width: 100%; }
+  .src-row #clearSrcBtn { display: none; flex: 1; }
+  .has-src .src-row #pickBtn {
+    width: auto;
+    flex: 1;
+    background: #2c3140;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .has-src .src-row #pickBtn:hover:not(:disabled) { background: #363c4e; }
+  .has-src .src-row #clearSrcBtn { display: inline-flex; }
+  #recRow { display: none; margin-top: 8px; }
+  .has-src #recRow { display: flex; }
+  #recRow .btn { flex: 1; }
+  #pauseBtn .ico-play { display: none; }
+  #pauseBtn.is-paused .ico-pause { display: none; }
+  #pauseBtn.is-paused .ico-play { display: block; }
+  .hint, .warn, .err {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .warn { color: #e6c07b; }
+  .err { color: #ff8b8b; }
 
-        html {
-            height: 100%;
-            font-family: Helvetica, sans-serif;
-            font-size: 20px;
-            color: #7a7a7a;
-        }
+  .fold {
+    margin-bottom: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #161922;
+    overflow: clip;
+    transition: height .4s ease;
+    height: 40px;
+  }
+  .fold.open { height: auto; }
+  .fold-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-weight: 650;
+    text-align: left;
+  }
+  .fold-head:hover { background: transparent; }
+  .fold .chevron {
+    margin-left: auto;
+    transition: transform .35s ease;
+  }
+  .fold.open .chevron { transform: rotate(180deg); }
+  .fold-body { padding: 4px 12px 12px; }
 
-        .page-transcodecs,
-        .page-recoder {
-            display: flex;
-            flex-direction: row;
-            height: 100%;
-            width: 100%;
-        }
-        @media screen and (max-width:765px) {
-            .page-recoder {
-                flex-direction: column;
-            }
-        }
-        .page-transcodecs {
-            background-color: burlywood;
-        }
-        .left-block,
-        .right-block {
-            flex-basis: 0;
-            flex-grow: 1;
-            padding: 2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        .page-recoder .left-block button{
-            all: unset;
-            width:10em;
-            height: 10em;
-            background-color: rgba(123,43,1,0.2);
-            border-radius: 50%;
-            text-align: center;
-            color: #FFF;
-            font-weight: bold;
-            transition: all .3s;
-        }
-        .left-block button:hover {
-            transform: scale(0.98);
-        }
-        .line {
-            width: 100%;
-            padding: 1em;
-        }
-        .line label {
-            display: block;
-            margin-bottom: 8px;
-            margin-left: 0.2em;
-        }
-        .line input,
-        .line select {
-            width: 100%;
-            display: inline-block;
-            border: 0;
-            background-color: rgb(238, 238, 238);
-            border-radius: 0.6em;
-            padding: 1em;
-            box-sizing: border-box;
-            outline-color: antiquewhite;
-        }
-        .page-transcodecs video {
-            width: 100%;
-            max-height: 90%;
-        }
-    </style>
+  #editBlock { display: none; margin-bottom: 12px; }
+  .has-video #editBlock { display: block; }
+  .edit-title {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .timeline {
+    position: relative;
+    height: 36px;
+    margin: 8px 0 4px;
+    user-select: none;
+    touch-action: none;
+  }
+  .rail {
+    position: absolute;
+    left: 0; right: 0; top: 16px;
+    height: 6px;
+    border-radius: 99px;
+    background: #2f3442;
+  }
+  .range {
+    position: absolute;
+    top: 16px;
+    height: 6px;
+    border-radius: 99px;
+    background: #6ea8ff;
+    pointer-events: none;
+  }
+  .handle {
+    position: absolute;
+    top: 6px;
+    width: 8px;
+    height: 24px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    cursor: ew-resize;
+    z-index: 2;
+  }
+  .handle-in {
+    margin-left: -8px;
+    border-radius: 4px 0 0 4px;
+  }
+  .handle-out {
+    margin-left: 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .playhead {
+    position: absolute;
+    top: 2px;
+    width: 2px;
+    height: 32px;
+    margin-left: -1px;
+    background: var(--rec);
+    cursor: ew-resize;
+    z-index: 3;
+  }
+  .playhead::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--rec);
+  }
+  .playhead::after {
+    content: "";
+    position: absolute;
+    inset: 0 -8px;
+  }
+  .times {
+    display: flex;
+    justify-content: space-between;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: #2a2e3a;
+    color: var(--text);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 9;
+  }
+  .toast.show { opacity: 1; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: minmax(280px, 45vh) 1fr; }
+    .side { border-left: 0; border-top: 1px solid var(--line); }
+  }
+</style>
 </head>
-
 <body>
-    <div class="page-recoder">
-        <div class="left-block">
-            <button onclick="record()">Record</button>
-        </div>
-        <div class="right-block">
-            <div class="line">
+<div class="app">
+  <section class="stage">
+    <div class="top">
+      <h1>录屏</h1>
+      <span class="chip" id="statusChip">未选择画面</span>
+    </div>
+    <div class="preview-wrap">
+      <video id="player" playsinline></video>
+      <div class="empty" id="emptyHint">
+        <strong>先选择要录的画面</strong>
+        <span>屏幕 / 窗口 / 标签页，选完再调编码并开始</span>
+      </div>
+    </div>
+    <div class="meta-bar" id="metaBar"></div>
+  </section>
 
-                <label for="pet-select">Video Type:</label>
-                <select>
-                    <option value="webm">mp4</option>
-                    <option value="webm">webm</option>
-                </select>
-            </div>
-            <div class="line">
-                <label for="pet-select">Video Codecs:</label>
-                <select>
-                    <option value="h264">h264</option>
-                    <option value="vp9">vp9</option>
-                </select>
-            </div>
-            <div class="line">
-                <label for="pet-select">audioBitsPerSecond(kb):</label>
-                <input type="number" value="2500">
-            </div>
-            <div class="line">
-                <label for="pet-select">videoBitsPerSecond(kb):</label>
-                <input type="number" value="2500">
-            </div>
-            <div class="line">
-                <label for="pet-select">FileName:</label>
-                <input type="text" placeholder="Record_{{time}}.mp4">
-            </div>
-        </div>
+  <aside class="side" id="side">
+    <div class="src-row">
+      <button class="btn btn-ok" id="pickBtn" type="button">
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+        <span>选取画面</span>
+      </button>
+      <button class="btn" id="clearSrcBtn" type="button">
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17H4a2 2 0 0 1-2-2V5c0-1.5 1-2 1-2"/><path d="M22 15V5a2 2 0 0 0-2-2H9"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="m2 2 20 20"/></svg>
+        <span>停止共享</span>
+      </button>
     </div>
-    <div class="page-transcodecs">
-        <div class="left-block">
-            <video autoplay controls></video>
-            <button>Download</button>
-        </div>
-        <div class="right-block"></div>
+    <div class="btns" id="recRow">
+      <button class="btn btn-ok" id="startBtn" type="button" disabled>
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg>
+        <span>录制</span>
+      </button>
+      <button class="btn" id="pauseBtn" type="button" disabled>
+        <svg class="i ico-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></svg>
+        <svg class="i ico-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        <span id="pauseLabel">暂停</span>
+      </button>
+      <button class="btn btn-danger" id="stopBtn" type="button" disabled>
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+        <span>结束</span>
+      </button>
     </div>
-    <!-- <div>MediaRecorder: 49</div> -->
-    <!-- <div>getDisplayMedia: 74</div> -->
+    <p class="hint" id="srcHint">音频必须在系统选择框里勾选；选完后不能再补进系统声，只能重新选源。</p>
+    <p class="hint" id="recHint"></p>
+
+    <div id="editBlock">
+      <h2 class="edit-title">截断 / 导出</h2>
+      <div class="btns" style="margin-bottom:8px">
+        <button class="btn" id="markInBtn" type="button">
+          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></svg>
+          <span>当前为起点</span>
+        </button>
+        <button class="btn" id="markOutBtn" type="button">
+          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg>
+          <span>当前为终点</span>
+        </button>
+        <button class="btn" id="previewTrimBtn" type="button">
+          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          <span>预览</span>
+        </button>
+      </div>
+      <div class="timeline" id="timeline">
+        <div class="rail"></div>
+        <div class="range" id="selRange"></div>
+        <div class="handle handle-in" id="inHandle"></div>
+        <div class="handle handle-out" id="outHandle"></div>
+        <div class="playhead" id="playhead"></div>
+      </div>
+      <div class="times">
+        <span id="inLabel">00:00.0</span>
+        <span id="selLabel">整段</span>
+        <span id="outLabel">00:00.0</span>
+      </div>
+      <button class="btn btn-ok btn-block" id="downloadBtn" type="button">
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        <span>下载</span>
+      </button>
+      <p class="hint">拖两端半边手柄截取区间，拖红线定位播放。下载时若有截取会按区间导出。</p>
+    </div>
+
+    <div class="fold open" id="foldRecord">
+      <button type="button" class="fold-head">
+        录制设置
+        <svg class="i chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="fold-body">
+        <div class="row">
+          <label class="field" for="mime">封装 / 编码</label>
+          <select id="mime"></select>
+        </div>
+        <div class="row">
+          <label class="field" for="res">分辨率</label>
+          <select id="res">
+            <option value="">保持源分辨率</option>
+            <option value="1920x1080">缩到 1080p</option>
+            <option value="1280x720">缩到 720p</option>
+            <option value="854x480">缩到 480p</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="field" for="fps">帧率</label>
+          <select id="fps">
+            <option value="">保持源帧率</option>
+            <option value="60">60 fps</option>
+            <option value="30">30 fps</option>
+            <option value="24">24 fps</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="field" for="vBit">视频码率 (kbps)</label>
+          <input id="vBit" type="number" min="200" max="50000" step="100" value="8000">
+        </div>
+        <div class="row">
+          <label class="field" for="aBit">音频码率 (kbps)</label>
+          <input id="aBit" type="number" min="32" max="512" step="16" value="128">
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="wantSystemAudio" checked>选择时请求系统 / 标签页音频</label>
+          <label><input type="checkbox" id="useDisplayAudio" checked>录制画面里的音频</label>
+          <label><input type="checkbox" id="useMic">同时录制麦克风</label>
+        </div>
+        <p class="hint">码率是给编码器的目标值。列表只出现 <code>isTypeSupported</code> 为真的格式。</p>
+      </div>
+    </div>
+
+    <div class="fold" id="foldAdvanced">
+      <button type="button" class="fold-head">
+        高级设置
+        <svg class="i chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="fold-body">
+        <div class="row">
+          <label class="field" for="surface">采集偏好</label>
+          <select id="surface">
+            <option value="">由系统决定</option>
+            <option value="monitor">优先整屏</option>
+            <option value="window">优先窗口</option>
+            <option value="browser">优先标签页</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="field" for="cursor">鼠标指针</label>
+          <select id="cursor">
+            <option value="always">始终显示</option>
+            <option value="motion">移动时显示</option>
+            <option value="never">不捕获</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="field" for="filename">文件名</label>
+          <input id="filename" type="text" placeholder="Record_时间戳">
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const MIME_CANDIDATES = [
+    { label: 'MP4 · H.264 + AAC', type: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2' },
+    { label: 'MP4 · H.264', type: 'video/mp4' },
+    { label: 'MP4 · AV1 + AAC', type: 'video/mp4;codecs=av01.0.05M.08,mp4a.40.2' },
+    { label: 'MP4 · AV1', type: 'video/mp4;codecs=av01.0.05M.08' },
+    { label: 'WebM · H.264 + Opus', type: 'video/webm;codecs=avc1,opus' },
+    { label: 'WebM · H.264', type: 'video/webm;codecs=h264' },
+    { label: 'WebM · AV1 + Opus', type: 'video/webm;codecs=av01,opus' },
+    { label: 'WebM · VP9 + Opus', type: 'video/webm;codecs=vp9,opus' },
+    { label: 'WebM · VP9', type: 'video/webm;codecs=vp9' },
+    { label: 'WebM · VP8 + Opus', type: 'video/webm;codecs=vp8,opus' },
+    { label: 'WebM · VP8', type: 'video/webm;codecs=vp8' },
+    { label: 'WebM', type: 'video/webm' }
+  ];
+  const STORE_KEY = 'gadget_recorder_settings';
+  const SETTING_FIELDS = [
+    { id: 'mime', kind: 'value' },
+    { id: 'res', kind: 'value' },
+    { id: 'fps', kind: 'value' },
+    { id: 'vBit', kind: 'value' },
+    { id: 'aBit', kind: 'value' },
+    { id: 'wantSystemAudio', kind: 'checked' },
+    { id: 'useDisplayAudio', kind: 'checked' },
+    { id: 'useMic', kind: 'checked' },
+    { id: 'surface', kind: 'value' },
+    { id: 'cursor', kind: 'value' },
+    { id: 'filename', kind: 'value' }
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const player = $('player');
+  const side = $('side');
+  const toastEl = $('toast');
+  let toastTimer = 0;
+
+  const state = {
+    phase: 'idle',
+    displayStream: null,
+    micStream: null,
+    recorder: null,
+    chunks: [],
+    originalBlob: null,
+    blob: null,
+    blobUrl: null,
+    duration: 0,
+    trimIn: 0,
+    trimOut: 0,
+    recStartedAt: 0,
+    pausedMs: 0,
+    pauseStartedAt: 0,
+    timerId: 0,
+    audioGraph: null
+  };
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  }
+
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return String(m).padStart(2, '0') + ':' + s.toFixed(1).padStart(4, '0');
+  }
+
+  function extOf(mime) {
+    if (!mime) return 'webm';
+    if (mime.includes('mp4')) return 'mp4';
+    if (mime.includes('ogg')) return 'ogv';
+    return 'webm';
+  }
+
+  function supportedMimes() {
+    if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return [];
+    return MIME_CANDIDATES.filter((item) => MediaRecorder.isTypeSupported(item.type));
+  }
+
+  function fillMimeSelect() {
+    const sel = $('mime');
+    sel.innerHTML = '';
+    const list = supportedMimes();
+    if (!list.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '当前浏览器未报告可用格式（将用默认）';
+      sel.appendChild(opt);
+      return;
+    }
+    list.forEach((item) => {
+      const opt = document.createElement('option');
+      opt.value = item.type;
+      opt.textContent = item.label;
+      sel.appendChild(opt);
+    });
+  }
+
+  function readSettings() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+
+  function saveSettings() {
+    const data = {};
+    SETTING_FIELDS.forEach((field) => {
+      const el = $(field.id);
+      if (!el) return;
+      data[field.id] = field.kind === 'checked' ? el.checked : el.value;
+    });
+    data.foldRecord = $('foldRecord').classList.contains('open');
+    data.foldAdvanced = $('foldAdvanced').classList.contains('open');
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+
+  function applySettings() {
+    const data = readSettings();
+    SETTING_FIELDS.forEach((field) => {
+      if (!(field.id in data)) return;
+      const el = $(field.id);
+      if (!el) return;
+      if (field.kind === 'checked') el.checked = !!data[field.id];
+      else if (field.id === 'mime') {
+        const match = Array.prototype.some.call(el.options, (opt) => opt.value === data.mime);
+        if (match) el.value = data.mime;
+      } else {
+        el.value = data[field.id];
+      }
+    });
+    if ('foldRecord' in data) $('foldRecord').classList.toggle('open', !!data.foldRecord);
+    if ('foldAdvanced' in data) $('foldAdvanced').classList.toggle('open', !!data.foldAdvanced);
+  }
+
+  function setChip(text, cls) {
+    const el = $('statusChip');
+    el.textContent = text;
+    el.className = 'chip' + (cls ? ' ' + cls : '');
+  }
+
+  function setPhase(phase) {
+    state.phase = phase;
+    const hasSrc = !!state.displayStream;
+    const reviewing = phase === 'review';
+    const recording = phase === 'recording' || phase === 'paused';
+    side.classList.toggle('has-src', hasSrc);
+    side.classList.toggle('has-video', reviewing);
+    $('pickBtn').disabled = recording;
+    $('clearSrcBtn').disabled = !hasSrc || recording;
+    $('surface').disabled = recording;
+    $('cursor').disabled = recording;
+    $('wantSystemAudio').disabled = recording;
+    $('mime').disabled = recording;
+    $('res').disabled = recording;
+    $('fps').disabled = recording;
+    $('vBit').disabled = recording;
+    $('aBit').disabled = recording;
+    $('useDisplayAudio').disabled = recording;
+    $('useMic').disabled = recording;
+    $('filename').disabled = recording;
+    $('startBtn').disabled = !hasSrc || recording;
+    $('pauseBtn').disabled = !recording;
+    $('pauseBtn').classList.toggle('is-paused', phase === 'paused');
+    $('pauseLabel').textContent = phase === 'paused' ? '继续' : '暂停';
+    $('stopBtn').disabled = !recording;
+    $('emptyHint').style.display = hasSrc || reviewing ? 'none' : 'flex';
+  }
+
+  function stopTracks(stream) {
+    if (!stream) return;
+    stream.getTracks().forEach((t) => t.stop());
+  }
+
+  function revokeUrl() {
+    if (state.blobUrl) URL.revokeObjectURL(state.blobUrl);
+    state.blobUrl = null;
+  }
+
+  function showLive() {
+    player.controls = false;
+    player.muted = true;
+    player.srcObject = state.displayStream;
+    player.play().catch(() => {});
+  }
+
+  function updateMeta() {
+    const bits = [];
+    if (state.displayStream) {
+      const v = state.displayStream.getVideoTracks()[0];
+      const s = v && v.getSettings ? v.getSettings() : {};
+      if (s.width && s.height) bits.push(s.width + '×' + s.height);
+      if (s.frameRate) bits.push(Math.round(s.frameRate) + ' fps');
+      if (s.displaySurface) bits.push(s.displaySurface);
+      const hasA = state.displayStream.getAudioTracks().some((t) => t.readyState === 'live');
+      bits.push(hasA ? '含画面音频' : '无画面音频');
+    }
+    if (state.recorder) {
+      bits.push(state.recorder.mimeType || '默认编码');
+      if (state.recorder.videoBitsPerSecond) {
+        bits.push(Math.round(state.recorder.videoBitsPerSecond / 1000) + ' kbps');
+      }
+    }
+    if (state.phase === 'recording' || state.phase === 'paused') {
+      bits.push(fmtTime(elapsedSec()));
+    }
+    if (state.blob) bits.push((state.blob.size / 1024 / 1024).toFixed(2) + ' MB');
+    $('metaBar').textContent = bits.join('  ·  ');
+  }
+
+  function elapsedSec() {
+    const extra = state.phase === 'paused' ? Date.now() - state.pauseStartedAt : 0;
+    return Math.max(0, (Date.now() - state.recStartedAt - state.pausedMs - extra) / 1000);
+  }
+
+  async function applyVideoHints() {
+    const track = state.displayStream && state.displayStream.getVideoTracks()[0];
+    if (!track || !track.applyConstraints) return;
+    const c = {};
+    const res = $('res').value;
+    if (res) {
+      const [w, h] = res.split('x').map(Number);
+      c.width = { ideal: w };
+      c.height = { ideal: h };
+      c.resizeMode = 'crop-and-scale';
+    }
+    if ($('fps').value) c.frameRate = { ideal: Number($('fps').value) };
+    if (!Object.keys(c).length) return;
+    try {
+      await track.applyConstraints(c);
+    } catch (err) {
+      toast('分辨率 / 帧率约束未被接受，将按源画面录');
+    }
+  }
+
+  async function pickSource() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      $('srcHint').className = 'err';
+      $('srcHint').textContent = '当前环境没有 getDisplayMedia（需要 HTTPS 或 localhost）。';
+      return;
+    }
+    const video = { cursor: $('cursor').value };
+    if ($('surface').value) video.displaySurface = $('surface').value;
+    const opts = {
+      video,
+      audio: $('wantSystemAudio').checked,
+      selfBrowserSurface: 'exclude',
+      surfaceSwitching: 'include',
+      monitorTypeSurfaces: 'include',
+      systemAudio: $('wantSystemAudio').checked ? 'include' : 'exclude'
+    };
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia(opts);
+      releaseSource();
+      state.displayStream = stream;
+      const v = stream.getVideoTracks()[0];
+      v.addEventListener('ended', () => {
+        if (state.phase === 'recording' || state.phase === 'paused') stopRecording();
+        else releaseSource();
+      });
+      showLive();
+      setChip('已选画面', 'live');
+      setPhase('ready');
+      const hasA = stream.getAudioTracks().length > 0;
+      $('srcHint').className = hasA ? 'hint' : 'warn';
+      $('srcHint').textContent = hasA
+        ? '已拿到画面音频轨。开始录制前仍可改编码、码率和麦克风。'
+        : '这次没有画面音频。若要系统声，请重新选择并在浏览器对话框里勾选音频。';
+      updateMeta();
+    } catch (err) {
+      if (err && err.name === 'NotAllowedError') toast('已取消选择');
+      else toast((err && err.message) || '无法获取画面');
+    }
+  }
+
+  function releaseSource() {
+    if (state.recorder && state.recorder.state !== 'inactive') {
+      try { state.recorder.stop(); } catch (e) {}
+    }
+    stopTracks(state.displayStream);
+    stopTracks(state.micStream);
+    state.displayStream = null;
+    state.micStream = null;
+    if (state.audioGraph) {
+      try { state.audioGraph.close(); } catch (e) {}
+      state.audioGraph = null;
+    }
+    if (state.phase !== 'review') {
+      player.srcObject = null;
+      player.removeAttribute('src');
+      setChip('未选择画面');
+      setPhase('idle');
+      updateMeta();
+    } else {
+      setPhase('review');
+      updateMeta();
+    }
+  }
+
+  async function mixStream() {
+    const videoTrack = state.displayStream.getVideoTracks()[0];
+    const audios = [];
+    if ($('useDisplayAudio').checked) {
+      state.displayStream.getAudioTracks().forEach((t) => {
+        if (t.readyState === 'live') audios.push(t);
+      });
+    }
+    if ($('useMic').checked) {
+      state.micStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true }
+      });
+      state.micStream.getAudioTracks().forEach((t) => audios.push(t));
+    }
+    if (audios.length <= 1) {
+      return { stream: new MediaStream([videoTrack].concat(audios)), close() {} };
+    }
+    const ctx = new AudioContext();
+    if (ctx.state === 'suspended') await ctx.resume();
+    const dest = ctx.createMediaStreamDestination();
+    audios.forEach((track) => {
+      ctx.createMediaStreamSource(new MediaStream([track])).connect(dest);
+    });
+    return {
+      stream: new MediaStream([videoTrack].concat(dest.stream.getAudioTracks())),
+      close() { ctx.close(); }
+    };
+  }
+
+  function recorderOptions(hasAudio) {
+    const options = {};
+    const mime = $('mime').value;
+    if (mime && MediaRecorder.isTypeSupported(mime)) options.mimeType = mime;
+    const v = Number($('vBit').value);
+    const a = Number($('aBit').value);
+    if (v > 0) options.videoBitsPerSecond = v * 1000;
+    if (hasAudio && a > 0) options.audioBitsPerSecond = a * 1000;
+    return options;
+  }
+
+  async function startRecording() {
+    if (!state.displayStream) return;
+    await applyVideoHints();
+    try {
+      const mixed = await mixStream();
+      state.audioGraph = mixed;
+      const options = recorderOptions(mixed.stream.getAudioTracks().length > 0);
+      let recorder;
+      try {
+        recorder = new MediaRecorder(mixed.stream, options);
+      } catch (err) {
+        recorder = new MediaRecorder(mixed.stream);
+        toast('指定编码不可用，已回退浏览器默认');
+      }
+      state.recorder = recorder;
+      state.chunks = [];
+      recorder.addEventListener('dataavailable', (e) => {
+        if (e.data && e.data.size) state.chunks.push(e.data);
+      });
+      recorder.addEventListener('stop', onRecorderStop);
+      recorder.addEventListener('error', (e) => {
+        toast((e.error && e.error.message) || '录制出错');
+      });
+      recorder.start(1000);
+      state.recStartedAt = Date.now();
+      state.pausedMs = 0;
+      setPhase('recording');
+      setChip('录制中', 'rec');
+      $('recHint').textContent = '实际编码：' + (recorder.mimeType || '浏览器默认') +
+        (recorder.videoBitsPerSecond ? ' · ' + Math.round(recorder.videoBitsPerSecond / 1000) + ' kbps' : '');
+      state.timerId = setInterval(updateMeta, 250);
+      updateMeta();
+    } catch (err) {
+      toast((err && err.message) || '无法开始录制');
+    }
+  }
+
+  function togglePause() {
+    const rec = state.recorder;
+    if (!rec) return;
+    if (rec.state === 'recording') {
+      rec.pause();
+      state.pauseStartedAt = Date.now();
+      setPhase('paused');
+      setChip('已暂停');
+    } else if (rec.state === 'paused') {
+      rec.resume();
+      state.pausedMs += Date.now() - state.pauseStartedAt;
+      setPhase('recording');
+      setChip('录制中', 'rec');
+    }
+  }
+
+  function stopRecording() {
+    const rec = state.recorder;
+    if (!rec || rec.state === 'inactive') return;
+    try { rec.requestData(); } catch (e) {}
+    rec.stop();
+  }
+
+  function waitEvent(el, name, ms) {
+    return new Promise((resolve) => {
+      const t = setTimeout(resolve, ms || 1500);
+      el.addEventListener(name, () => { clearTimeout(t); resolve(); }, { once: true });
+    });
+  }
+
+  async function probeDuration(fallback) {
+    if (isFinite(player.duration) && player.duration > 0) return player.duration;
+    player.currentTime = 1e10;
+    await Promise.race([waitEvent(player, 'seeked'), waitEvent(player, 'timeupdate')]);
+    const d = isFinite(player.duration) && player.duration > 0 ? player.duration : fallback;
+    player.currentTime = 0;
+    await waitEvent(player, 'seeked');
+    return d;
+  }
+
+  async function onRecorderStop() {
+    clearInterval(state.timerId);
+    if (state.audioGraph) {
+      try { state.audioGraph.close(); } catch (e) {}
+      state.audioGraph = null;
+    }
+    stopTracks(state.micStream);
+    state.micStream = null;
+    const type = (state.recorder && state.recorder.mimeType) || 'video/webm';
+    const blob = new Blob(state.chunks, { type });
+    state.originalBlob = blob;
+    state.blob = blob;
+    state.recorder = null;
+    player.srcObject = null;
+    revokeUrl();
+    state.blobUrl = URL.createObjectURL(blob);
+    player.src = state.blobUrl;
+    player.muted = false;
+    player.controls = true;
+    await waitEvent(player, 'loadedmetadata');
+    const wall = elapsedSec();
+    state.duration = await probeDuration(wall);
+    state.trimIn = 0;
+    state.trimOut = state.duration;
+    setPhase('review');
+    setChip('在线视频录制');
+    drawTrim();
+    updateMeta();
+    $('recHint').textContent = state.displayStream && state.displayStream.getVideoTracks()[0].readyState === 'live'
+      ? '画面共享仍在。可截断下载，或再点「录制」。'
+      : '共享已结束。可截断或下载；再录需要重新选择画面。';
+  }
+
+  function fileName() {
+    const raw = $('filename').value.trim() || ('Record_' + new Date().toISOString().replace(/[:.]/g, '-'));
+    const ext = extOf(state.blob && state.blob.type);
+    return raw.replace(/\.(webm|mp4|ogv)$/i, '') + '.' + ext;
+  }
+
+  function downloadBlob(blob) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName();
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  function ratioToTime(r) {
+    return Math.max(0, Math.min(state.duration, r * state.duration));
+  }
+
+  function drawTrim() {
+    const dur = state.duration || 1;
+    const inR = state.trimIn / dur;
+    const outR = state.trimOut / dur;
+    $('inHandle').style.left = (inR * 100) + '%';
+    $('outHandle').style.left = (outR * 100) + '%';
+    $('selRange').style.left = (inR * 100) + '%';
+    $('selRange').style.width = ((outR - inR) * 100) + '%';
+    $('inLabel').textContent = fmtTime(state.trimIn);
+    $('outLabel').textContent = fmtTime(state.trimOut);
+    const full = state.trimIn <= 0.05 && state.trimOut >= dur - 0.05;
+    $('selLabel').textContent = full ? '整段 ' + fmtTime(dur) : fmtTime(state.trimOut - state.trimIn);
+    $('playhead').style.left = ((player.currentTime / dur) * 100) + '%';
+  }
+
+  function bindTimeline() {
+    const el = $('timeline');
+    let dragging = null;
+    function pos(ev) {
+      const rect = el.getBoundingClientRect();
+      return Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+    }
+    function hit(ev) {
+      const rect = el.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const dur = state.duration || 1;
+      const inX = (state.trimIn / dur) * rect.width;
+      const outX = (state.trimOut / dur) * rect.width;
+      const playX = (player.currentTime / dur) * rect.width;
+      const dIn = Math.abs(x - inX);
+      const dOut = Math.abs(x - outX);
+      const dPlay = Math.abs(x - playX);
+      if (dIn <= 10 && dIn <= dOut && dIn <= dPlay) return 'in';
+      if (dOut <= 10 && dOut <= dPlay) return 'out';
+      return 'play';
+    }
+    function move(ev) {
+      if (!dragging || state.phase !== 'review') return;
+      const t = ratioToTime(pos(ev));
+      if (dragging === 'in') state.trimIn = Math.min(t, state.trimOut - 0.1);
+      else if (dragging === 'out') state.trimOut = Math.max(t, state.trimIn + 0.1);
+      else player.currentTime = Math.min(Math.max(t, state.trimIn), state.trimOut);
+      drawTrim();
+    }
+    el.addEventListener('pointerdown', (ev) => {
+      if (state.phase !== 'review') return;
+      dragging = hit(ev);
+      move(ev);
+      el.setPointerCapture(ev.pointerId);
+    });
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerup', () => { dragging = null; });
+  }
+
+  function captureElementStream(video) {
+    if (video.captureStream) return video.captureStream();
+    if (video.mozCaptureStream) return video.mozCaptureStream();
+    return null;
+  }
+
+  function canvasFallbackStream(video) {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+    const stream = canvas.captureStream(30);
+    let running = true;
+    (function draw() {
+      if (!running) return;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(draw);
+    })();
+    return {
+      stream,
+      stop() { running = false; stream.getTracks().forEach((t) => t.stop()); }
+    };
+  }
+
+  async function exportRange(start, end) {
+    const wasMuted = player.muted;
+    const wasTime = player.currentTime;
+    player.pause();
+    player.currentTime = start;
+    await waitEvent(player, 'seeked');
+
+    const options = recorderOptions(true);
+    let extraStop = () => {};
+    let recStream = captureElementStream(player);
+    if (!recStream) {
+      const fb = canvasFallbackStream(player);
+      recStream = fb.stream;
+      extraStop = fb.stop;
+    }
+
+    let rec;
+    try {
+      rec = new MediaRecorder(recStream, options);
+    } catch (e) {
+      rec = new MediaRecorder(recStream);
+    }
+    const chunks = [];
+    rec.addEventListener('dataavailable', (e) => {
+      if (e.data && e.data.size) chunks.push(e.data);
+    });
+    const done = new Promise((resolve) => rec.addEventListener('stop', resolve));
+    rec.start(200);
+    player.muted = true;
+    await player.play();
+
+    await new Promise((resolve) => {
+      const tick = () => {
+        if (player.currentTime >= end - 0.05 || player.ended) {
+          player.removeEventListener('timeupdate', tick);
+          resolve();
+        }
+      };
+      player.addEventListener('timeupdate', tick);
+    });
+
+    player.pause();
+    rec.stop();
+    await done;
+    extraStop();
+    player.muted = wasMuted;
+    player.currentTime = wasTime;
+    return new Blob(chunks, { type: rec.mimeType || state.blob.type });
+  }
+
+  player.addEventListener('timeupdate', () => {
+    if (state.phase !== 'review') return;
+    if (player.currentTime > state.trimOut) {
+      player.pause();
+      player.currentTime = state.trimOut;
+    }
+    if (player.currentTime < state.trimIn - 0.05) {
+      player.currentTime = state.trimIn;
+    }
+    drawTrim();
+  });
+
+  $('pickBtn').addEventListener('click', pickSource);
+  $('clearSrcBtn').addEventListener('click', releaseSource);
+  $('startBtn').addEventListener('click', () => {
+    if (state.phase === 'review' && state.displayStream) {
+      revokeUrl();
+      state.blob = null;
+      state.originalBlob = null;
+      showLive();
+    }
+    startRecording();
+  });
+  $('pauseBtn').addEventListener('click', togglePause);
+  $('stopBtn').addEventListener('click', stopRecording);
+  $('markInBtn').addEventListener('click', () => {
+    state.trimIn = Math.min(player.currentTime, state.trimOut - 0.1);
+    drawTrim();
+  });
+  $('markOutBtn').addEventListener('click', () => {
+    state.trimOut = Math.max(player.currentTime, state.trimIn + 0.1);
+    drawTrim();
+  });
+  $('previewTrimBtn').addEventListener('click', () => {
+    player.currentTime = state.trimIn;
+    player.play();
+  });
+  $('downloadBtn').addEventListener('click', async () => {
+    if (!state.blob) return;
+    const trimmed = state.trimIn > 0.08 || state.trimOut < state.duration - 0.08;
+    if (!trimmed) {
+      downloadBlob(state.blob);
+      return;
+    }
+    $('downloadBtn').disabled = true;
+    toast('正在导出截断…');
+    try {
+      downloadBlob(await exportRange(state.trimIn, state.trimOut));
+    } catch (err) {
+      toast((err && err.message) || '导出失败');
+    }
+    $('downloadBtn').disabled = false;
+  });
+
+  bindTimeline();
+  fillMimeSelect();
+  applySettings();
+  SETTING_FIELDS.forEach((field) => {
+    $(field.id).addEventListener('change', saveSettings);
+    if (field.kind === 'value') $(field.id).addEventListener('input', saveSettings);
+  });
+  ['foldRecord', 'foldAdvanced'].forEach((id) => {
+    $(id).querySelector('.fold-head').addEventListener('click', () => {
+      $(id).classList.toggle('open');
+      saveSettings();
+    });
+  });
+  setPhase('idle');
+
+  if (!window.isSecureContext) {
+    $('srcHint').className = 'err';
+    $('srcHint').textContent = 'getDisplayMedia 只能在 HTTPS 或 localhost 使用。';
+  } else if (!window.MediaRecorder) {
+    $('recHint').className = 'err';
+    $('recHint').textContent = '当前浏览器没有 MediaRecorder。';
+  }
+})();
+</script>
 </body>
-
 </html>

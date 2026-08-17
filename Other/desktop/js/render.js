@@ -4,10 +4,8 @@ var D = window.D || {};
 D.renderAll=function(){
   document.querySelectorAll('.icon').forEach(function(el){el.remove()});
   D.icons.forEach(function(ic){document.body.appendChild(D.createIconEl(ic))});
-  D.toggleHint();D.updateGridLabel();
+  D.updateGridLabel();
 };
-
-D.toggleHint=function(){document.getElementById('hint').style.opacity=D.icons.length?'0':'1'};
 
 D.updateGridLabel=function(){
   var el=document.querySelector('#snapToggle .shortcut');

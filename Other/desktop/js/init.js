@@ -8,11 +8,12 @@ document.addEventListener('mousemove',function(e){D.mouseX=e.clientX;D.mouseY=e.
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
     if(D._mask.classList.contains('show')){D._mask.classList.remove('show')}
+    if(D._textMask&&D._textMask.classList.contains('show'))D.closeTextSettings();
     if(D._prefsMask&&D._prefsMask.classList.contains('show'))D.closePrefs();
     if(D._confirmMask.classList.contains('show'))D._confirmMask.classList.remove('show');
     D.hideMenus();D.clearSelection();
   }
-  if((e.key==='Delete'||e.key==='Backspace')&&!D._mask.classList.contains('show')&&!D._confirmMask.classList.contains('show')&&!(D._prefsMask&&D._prefsMask.classList.contains('show'))){
+  if((e.key==='Delete'||e.key==='Backspace')&&!D._mask.classList.contains('show')&&!(D._textMask&&D._textMask.classList.contains('show'))&&!D._confirmMask.classList.contains('show')&&!(D._prefsMask&&D._prefsMask.classList.contains('show'))){
     if(document.activeElement&&document.activeElement.isContentEditable)return;
     var sel=D.selectedIcons();if(sel.length){
       e.preventDefault();

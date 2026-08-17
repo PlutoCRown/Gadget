@@ -149,8 +149,15 @@ document.getElementById('importFile').addEventListener('change',async function(e
     D.load();
     document.querySelectorAll('.icon').forEach(function(el){el.remove()});
     D.renderAll();
+    if(Array.isArray(data.texts)){
+      D.texts=data.texts;
+      D.saveTexts();
+      D.renderAllTexts();
+    }
     D.closePrefs();
-    toast('导入成功！共 '+data.icons.length+' 个图标');
+    var msg='导入成功！共 '+data.icons.length+' 个图标';
+    if(Array.isArray(data.texts))msg+='、'+data.texts.length+' 个文本';
+    toast(msg);
   }catch(err){
     toast('导入失败：'+err.message);
   }

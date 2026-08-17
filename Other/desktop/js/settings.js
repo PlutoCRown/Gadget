@@ -66,11 +66,11 @@ function renderPreview(){
 
 /* 色盘选中状态 */
 function syncSwatchActive(){
-  document.querySelectorAll('.color-swatches .swatch[data-color]').forEach(function(s){
+  document.querySelectorAll('#colorSwatches .swatch[data-color]').forEach(function(s){
     s.classList.toggle('active',s.dataset.color===currentColor);
   });
   var isPreset=PRESETS.indexOf(currentColor)>=0;
-  document.querySelector('.swatch-custom').classList.toggle('active',!isPreset);
+  document.querySelector('#colorSwatches .swatch-custom').classList.toggle('active',!isPreset);
 }
 
 /* hex → hsl，返回 {h,s,l} 0-1 */
@@ -94,7 +94,7 @@ function hexToGradient(hex,shift){
   return 'linear-gradient(135deg,'+hslStr(h1,c.s,c.l)+','+hslStr(h2,c.s,c.l)+')';
 }
 
-document.querySelectorAll('.color-swatches .swatch[data-color]').forEach(function(s){
+document.querySelectorAll('#colorSwatches .swatch[data-color]').forEach(function(s){
   s.addEventListener('click',function(){currentColor=s.dataset.color;syncSwatchActive();renderPreview()});
 });
 sColor.addEventListener('input',function(){currentColor=hexToGradient(sColor.value);syncSwatchActive();renderPreview()});

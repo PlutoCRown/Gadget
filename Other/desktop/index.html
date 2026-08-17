@@ -9,8 +9,6 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="hint" id="hint">将链接拖放到此处创建桌面图标 · 空白处拖动框选 · 右键更多操作</div>
-
 <!-- 框选 -->
 <div class="select-box" id="selectBox"></div>
 
@@ -71,6 +69,49 @@
       <span style="flex:1"></span>
       <button class="btn cancel" id="settingsCancel">取消</button>
       <button class="btn confirm" id="settingsSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 文本设置弹窗 -->
+<div class="modal-mask" id="textSettingsMask">
+  <div class="modal">
+    <h3>文本设置</h3>
+    <div class="text-style-preview" id="textStylePreview">预览文本</div>
+    <div class="field">
+      <label>字体大小</label>
+      <div class="size-row">
+        <input type="range" id="textFontSizeRange" min="12" max="120" value="28">
+        <input type="number" id="textFontSize" min="12" max="120" value="28">
+        <span class="size-unit">px</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>字体颜色</label>
+      <div class="color-swatches" id="textColorSwatches">
+        <span class="swatch" data-color="#ffffff" style="background:#ffffff"></span>
+        <span class="swatch" data-color="#cccccc" style="background:#cccccc"></span>
+        <span class="swatch" data-color="#8ab4f8" style="background:#8ab4f8"></span>
+        <span class="swatch" data-color="#34d399" style="background:#34d399"></span>
+        <span class="swatch" data-color="#fbbf24" style="background:#fbbf24"></span>
+        <span class="swatch" data-color="#f472b6" style="background:#f472b6"></span>
+        <span class="swatch" data-color="#f87171" style="background:#f87171"></span>
+        <label class="swatch swatch-custom" title="自定义颜色">
+          <input type="color" id="textColor" value="#cccccc">
+        </label>
+      </div>
+      <div class="size-row opacity-row">
+        <span class="size-unit">透明度</span>
+        <input type="range" id="textOpacityRange" min="0" max="100" value="100">
+        <input type="number" id="textOpacity" min="0" max="100" value="100">
+        <span class="size-unit">%</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn danger" id="textSettingsDelete">删除</button>
+      <span style="flex:1"></span>
+      <button class="btn cancel" id="textSettingsCancel">取消</button>
+      <button class="btn confirm" id="textSettingsSave">保存</button>
     </div>
   </div>
 </div>

@@ -249,6 +249,7 @@ body.drag-over::before{
 .color-swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .color-swatches .swatch{
   width:26px;height:26px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;
   transition:transform .12s,border-color .12s;
   flex-shrink:0;
 }
@@ -262,10 +263,45 @@ body.drag-over::before{
   position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
 }
 
-.hint{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  color:var(--color-text-disabled);font-size:var(--font-size);pointer-events:none;
-  transition:opacity .3s;
+/* ===== 文本设置弹窗 ===== */
+.text-style-preview{
+  padding:20px 16px;margin-bottom:16px;min-height:72px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--color-fill);border-radius:var(--border-radius);
+  line-height:1.2;word-break:break-all;text-align:center;
+  overflow:hidden;max-height:140px;
+}
+.size-row{display:flex;align-items:center;gap:10px}
+.size-row input[type=range]{flex:1;accent-color:var(--color-primary);cursor:pointer}
+.size-row input[type=number]{
+  width:72px;padding:8px 10px;font-size:var(--font-size-lg);
+  background:var(--color-fill);border:1px solid var(--color-border);
+  border-radius:var(--border-radius);color:var(--color-text);outline:none;
+}
+.size-row input[type=number]:focus{border-color:var(--color-primary-border)}
+.size-unit{color:var(--color-text-tertiary);font-size:var(--font-size-sm)}
+.opacity-row{margin-top:10px}
+.opacity-row input[type=range]{
+  height:14px;border-radius:7px;
+  background:
+    linear-gradient(to right, transparent, var(--opacity-color,#cccccc)),
+    repeating-conic-gradient(#6a6a6a 0% 25%, #9a9a9a 0% 50%) 0 0 / 10px 10px;
+  appearance:none;-webkit-appearance:none;
+}
+.opacity-row input[type=range]::-webkit-slider-runnable-track{
+  height:14px;border-radius:7px;background:transparent;
+}
+.opacity-row input[type=range]::-webkit-slider-thumb{
+  appearance:none;-webkit-appearance:none;
+  width:16px;height:16px;margin-top:-1px;border-radius:50%;
+  background:#fff;border:2px solid rgba(0,0,0,.35);cursor:pointer;
+}
+.opacity-row input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;border:2px solid rgba(0,0,0,.35);cursor:pointer;
+}
+.opacity-row input[type=range]::-moz-range-track{
+  height:14px;border-radius:7px;background:transparent;border:none;
 }
 
 /* ===== 布局 tabs ===== */
